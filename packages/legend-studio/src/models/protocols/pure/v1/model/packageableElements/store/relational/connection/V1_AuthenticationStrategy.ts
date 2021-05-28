@@ -26,7 +26,8 @@ export abstract class V1_AuthenticationStrategy implements Hashable {
 
 export class V1_DelegatedKerberosAuthenticationStrategy
   extends V1_AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   serverPrincipal?: string;
   get hashCode(): string {
     return hashArray([
@@ -38,7 +39,8 @@ export class V1_DelegatedKerberosAuthenticationStrategy
 
 export class V1_DefaultH2AuthenticationStrategy
   extends V1_AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   get hashCode(): string {
     return hashArray([CORE_HASH_STRUCTURE.DEFAULT_H2_AUTHENTICATION_STRATEGY]);
   }
@@ -46,7 +48,8 @@ export class V1_DefaultH2AuthenticationStrategy
 
 export class V1_TestDatabaseAuthenticationStrategy
   extends V1_DefaultH2AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   get hashCode(): string {
     return hashArray([
       CORE_HASH_STRUCTURE.TEST_DATABASE_AUTHENTICATION_STRATEGY,
@@ -56,7 +59,8 @@ export class V1_TestDatabaseAuthenticationStrategy
 
 export class V1_OAuthAuthenticationStrategy
   extends V1_AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   oauthKey!: string;
   scopeName!: string;
 
@@ -65,6 +69,24 @@ export class V1_OAuthAuthenticationStrategy
       CORE_HASH_STRUCTURE.OAUTH_AUTHENTICATION_STRATEGY,
       this.oauthKey,
       this.scopeName,
+    ]);
+  }
+}
+
+export class V1_SnowflakePublicAuthenticationStrategy
+  extends V1_AuthenticationStrategy
+  implements Hashable
+{
+  privateKeyVaultReference!: string;
+  passPhraseVaultReference!: string;
+  publicUserName!: string;
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.SNOWFLAKE_PUBLIC_AUTHENTICATION_STRATEGY,
+      this.privateKeyVaultReference,
+      this.passPhraseVaultReference,
+      this.publicUserName,
     ]);
   }
 }

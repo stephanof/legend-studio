@@ -27,7 +27,8 @@ export abstract class AuthenticationStrategy implements Hashable {
 
 export class DelegatedKerberosAuthenticationStrategy
   extends AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   serverPrincipal?: string;
   constructor() {
     super();
@@ -52,7 +53,8 @@ export class DelegatedKerberosAuthenticationStrategy
 
 export class DefaultH2AuthenticationStrategy
   extends AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   constructor() {
     super();
 
@@ -68,7 +70,8 @@ export class DefaultH2AuthenticationStrategy
 
 export class TestDatabaseAuthenticationStrategy
   extends DefaultH2AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   constructor() {
     super();
 
@@ -86,7 +89,8 @@ export class TestDatabaseAuthenticationStrategy
 
 export class OAuthAuthenticationStrategy
   extends AuthenticationStrategy
-  implements Hashable {
+  implements Hashable
+{
   oauthKey: string;
   scopeName: string;
 
@@ -117,6 +121,58 @@ export class OAuthAuthenticationStrategy
       CORE_HASH_STRUCTURE.OAUTH_AUTHENTICATION_STRATEGY,
       this.oauthKey,
       this.scopeName,
+    ]);
+  }
+}
+
+export class SnowflakePublicAuthenticationStrategy
+  extends AuthenticationStrategy
+  implements Hashable
+{
+  privateKeyVaultReference: string;
+  passPhraseVaultReference: string;
+  publicUserName: string;
+
+  constructor(
+    privateKeyVaultReference: string,
+    passPhraseVaultReference: string,
+    publicUserName: string,
+  ) {
+    super();
+
+    makeObservable(this, {
+      privateKeyVaultReference: observable,
+      passPhraseVaultReference: observable,
+      publicUserName: observable,
+      setPrivateKeyVaultReference: action,
+      setPassPhraseVaultReference: action,
+      setPublicUserName: action,
+      hashCode: computed,
+    });
+
+    this.privateKeyVaultReference = privateKeyVaultReference;
+    this.passPhraseVaultReference = passPhraseVaultReference;
+    this.publicUserName = publicUserName;
+  }
+
+  setPrivateKeyVaultReference(val: string): void {
+    this.privateKeyVaultReference = val;
+  }
+
+  setPassPhraseVaultReference(val: string): void {
+    this.passPhraseVaultReference = val;
+  }
+
+  setPublicUserName(val: string): void {
+    this.publicUserName = val;
+  }
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.SNOWFLAKE_PUBLIC_AUTHENTICATION_STRATEGY,
+      this.privateKeyVaultReference,
+      this.passPhraseVaultReference,
+      this.publicUserName,
     ]);
   }
 }

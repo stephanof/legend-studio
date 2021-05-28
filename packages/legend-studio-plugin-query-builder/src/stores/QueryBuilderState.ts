@@ -38,7 +38,6 @@ import { QueryBuilderUnsupportedState } from './QueryBuilderUnsupportedState';
 import type { EditorStore } from '@finos/legend-studio';
 import {
   EditorExtensionState,
-  AUX_PANEL_MODE,
   CollectionInstanceValue,
   CompilationError,
   CORE_ELEMENT_PATH,
@@ -84,6 +83,10 @@ import {
   QueryBuilderIsEmptyOperator,
   QueryBuilderIsNotEmptyOperator,
 } from './operators/QueryBuilderIsEmptyOperator';
+import {
+  QueryBuilderInOperator,
+  QueryBuilderNotInOperator,
+} from './operators/QueryBuilderInOperator';
 
 export class QueryBuilderState extends EditorExtensionState {
   editorStore: EditorStore;
@@ -109,6 +112,8 @@ export class QueryBuilderState extends EditorExtensionState {
     new QueryBuilderNotContainOperator(),
     new QueryBuilderEndWithOperator(),
     new QueryBuilderNotEndWithOperator(),
+    new QueryBuilderInOperator(),
+    new QueryBuilderNotInOperator(),
     new QueryBuilderIsEmptyOperator(),
     new QueryBuilderIsNotEmptyOperator(),
   ];
@@ -249,9 +254,10 @@ export class QueryBuilderState extends EditorExtensionState {
       this.querySetupState._class,
       'Class is required to execute query',
     );
-    const multiplicityOne = this.editorStore.graphState.graph.getTypicalMultiplicity(
-      TYPICAL_MULTIPLICITY_TYPE.ONE,
-    );
+    const multiplicityOne =
+      this.editorStore.graphState.graph.getTypicalMultiplicity(
+        TYPICAL_MULTIPLICITY_TYPE.ONE,
+      );
     const stringType = this.editorStore.graphState.graph.getPrimitiveType(
       PRIMITIVE_TYPE.STRING,
     );
@@ -314,8 +320,8 @@ export class QueryBuilderState extends EditorExtensionState {
       this.fetchStructureState.isGraphFetchMode() &&
       this.fetchStructureState.graphFetchTreeState.graphFetchTree
     ) {
-      const graphFetchTreeState = this.fetchStructureState.graphFetchTreeState
-        .graphFetchTree;
+      const graphFetchTreeState =
+        this.fetchStructureState.graphFetchTreeState.graphFetchTree;
       const root = graphFetchTreeState.root;
       const graphFetchInstance = new RootGraphFetchTreeInstanceValue(
         multiplicityOne,
@@ -362,9 +368,10 @@ export class QueryBuilderState extends EditorExtensionState {
     const typeAny = this.editorStore.graphState.graph.getClass(
       CORE_ELEMENT_PATH.ANY,
     );
-    const multiplicityOne = this.editorStore.graphState.graph.getTypicalMultiplicity(
-      TYPICAL_MULTIPLICITY_TYPE.ONE,
-    );
+    const multiplicityOne =
+      this.editorStore.graphState.graph.getTypicalMultiplicity(
+        TYPICAL_MULTIPLICITY_TYPE.ONE,
+      );
     // main filter expression
     const filterExpression = new SimpleFunctionExpression(
       SUPPORTED_FUNCTIONS.FILTER,
@@ -422,10 +429,11 @@ export class QueryBuilderState extends EditorExtensionState {
   }
 
   buildLambdaFunctionFromRawLambda(rawLambda: RawLambda): LambdaFunction {
-    const valueSpec = this.editorStore.graphState.graphManager.buildValueSpecification(
-      rawLambda,
-      this.editorStore.graphState.graph,
-    );
+    const valueSpec =
+      this.editorStore.graphState.graphManager.buildValueSpecification(
+        rawLambda,
+        this.editorStore.graphState.graph,
+      );
     const compiledValueSpecification = guaranteeType(
       valueSpec,
       LambdaFunctionInstanceValue,
@@ -450,12 +458,12 @@ export class QueryBuilderState extends EditorExtensionState {
     );
   }
 
-  saveQuery(): void {
+  async saveQuery(): Promise<void> {
     const onQuerySave = this.querySetupState.onSave;
     if (onQuerySave) {
       try {
         const rawLambda = this.getRawLambdaQuery();
-        onQuerySave(rawLambda);
+        await onQuerySave(rawLambda);
       } catch (error: unknown) {
         assertErrorThrown(error);
         this.editorStore.applicationStore.notifyError(
@@ -480,7 +488,6 @@ export class QueryBuilderState extends EditorExtensionState {
     if (this.isEditingInTextMode()) {
       try {
         this.editorStore.graphState.clearCompilationError();
-        this.editorStore.setActiveAuxPanelMode(AUX_PANEL_MODE.CONSOLE);
         (yield this.editorStore.graphState.graphManager.getLambdaReturnType(
           this.queryTextEditorState.rawLambdaState.lambda,
           this.editorStore.graphState.graph,

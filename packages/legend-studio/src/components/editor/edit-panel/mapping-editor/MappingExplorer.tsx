@@ -45,7 +45,7 @@ import { CORE_TEST_ID } from '../../../../const';
 import { getElementIcon } from '../../../shared/Icon';
 import { NewMappingElementModal } from '../../../editor/edit-panel/mapping-editor/NewMappingElementModal';
 import { useApplicationStore } from '../../../../stores/ApplicationStore';
-import { MappingElementDecorateVisitor } from '../../../../stores/editor-state/element-editor-state/mapping/MapingElementDecorateVisitor';
+import { MappingElementDecorateVisitor } from '../../../../stores/editor-state/element-editor-state/mapping/MappingElementDecorateVisitor';
 import type { MappingElement } from '../../../../models/metamodels/pure/model/packageableElements/mapping/Mapping';
 import {
   getMappingElementType,
@@ -67,9 +67,8 @@ export const MappingExplorerContextMenu = observer(
     const { mappingElement, openNewMapingModal } = props;
     const editorStore = useEditorStore();
     const applicationStore = useApplicationStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const currentMappingElement =
       mappingEditorState.currentTabState instanceof MappingElementState
         ? mappingEditorState.currentTabState.mappingElement
@@ -123,9 +122,8 @@ export const MappingElementExplorer = observer(
   }) => {
     const { mappingElement, openNewMapingModal, isReadOnly } = props;
     const editorStore = useEditorStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const currentMappingElement =
       mappingEditorState.currentTabState instanceof MappingElementState
         ? mappingEditorState.currentTabState.mappingElement
@@ -136,21 +134,19 @@ export const MappingElementExplorer = observer(
     // Drag and Drop
     const [, dragRef] = useDrag(
       () => ({
-        item: new MappingElementDragSource(
+        type:
           mappingElement instanceof SetImplementation
             ? CORE_DND_TYPE.MAPPING_EXPLORER_CLASS_MAPPING
             : CORE_DND_TYPE.NONE,
-          mappingElement,
-        ),
+        item: new MappingElementDragSource(mappingElement),
       }),
       [mappingElement],
     );
     // Selection
     const isActive =
       currentMappingElement?.id.value === mappingElement.id.value;
-    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] = useState(
-      false,
-    );
+    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] =
+      useState(false);
     const onContextMenuOpen = (): void => setIsSelectedFromContextMenu(true);
     const onContextMenuClose = (): void => setIsSelectedFromContextMenu(false);
 
@@ -215,9 +211,8 @@ const MappingElementTreeNodeContainer = observer(
     const { isReadOnly, onNodeExpand } = innerProps;
     const mappingElement = node.mappingElement;
     const editorStore = useEditorStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const currentMappingElement =
       mappingEditorState.currentTabState instanceof MappingElementState
         ? mappingEditorState.currentTabState.mappingElement
@@ -244,12 +239,11 @@ const MappingElementTreeNodeContainer = observer(
     // Drag and Drop
     const [, dragRef] = useDrag(
       () => ({
-        item: new MappingElementDragSource(
+        type:
           mappingElement instanceof SetImplementation
             ? CORE_DND_TYPE.MAPPING_EXPLORER_CLASS_MAPPING
             : CORE_DND_TYPE.NONE,
-          mappingElement,
-        ),
+        item: new MappingElementDragSource(mappingElement),
       }),
       [mappingElement],
     );
@@ -258,9 +252,8 @@ const MappingElementTreeNodeContainer = observer(
     // Selection
     const isActive =
       currentMappingElement?.id.value === mappingElement.id.value;
-    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] = useState(
-      false,
-    );
+    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] =
+      useState(false);
     const onContextMenuOpen = (): void => setIsSelectedFromContextMenu(true);
     const onContextMenuClose = (): void => setIsSelectedFromContextMenu(false);
 
@@ -317,9 +310,8 @@ const getMappingIdentitySortString = (
 export const MappingExplorer = observer((props: { isReadOnly: boolean }) => {
   const { isReadOnly } = props;
   const editorStore = useEditorStore();
-  const mappingEditorState = editorStore.getCurrentEditorState(
-    MappingEditorState,
-  );
+  const mappingEditorState =
+    editorStore.getCurrentEditorState(MappingEditorState);
   const mapping = mappingEditorState.mapping;
   const mappingElements = mapping
     .getAllMappingElements()

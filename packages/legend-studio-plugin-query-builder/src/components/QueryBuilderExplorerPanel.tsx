@@ -16,17 +16,6 @@
 
 import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import {
-  FaChevronDown,
-  FaChevronRight,
-  FaCompress,
-  FaHashtag,
-  FaClock,
-  FaToggleOn,
-  FaInfoCircle,
-  FaEye,
-} from 'react-icons/fa';
-import { MdMoreVert, MdTextFields } from 'react-icons/md';
 import type {
   TreeNodeContainerProps,
   TreeNodeViewProps,
@@ -41,6 +30,16 @@ import {
   MenuContentItem,
   MenuContentItemIcon,
   MenuContentItemLabel,
+  StringTypeIcon,
+  BooleanTypeIcon,
+  NumberTypeIcon,
+  DateTypeIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  MoreVerticalIcon,
+  CompressIcon,
+  EyeIcon,
+  InfoCircleIcon,
 } from '@finos/legend-studio-components';
 import type {
   QueryBuilderExplorerTreeDragSource,
@@ -145,19 +144,20 @@ const renderPropertyTypeIcon = (type: Type): React.ReactNode => {
   if (type instanceof PrimitiveType) {
     if (type.name === PRIMITIVE_TYPE.STRING) {
       return (
-        <MdTextFields className="query-builder-tree__icon query-builder-tree__icon__string" />
+        <StringTypeIcon className="query-builder-tree__icon query-builder-tree__icon__string" />
       );
     } else if (type.name === PRIMITIVE_TYPE.BOOLEAN) {
       return (
-        <FaToggleOn className="query-builder-tree__icon query-builder-tree__icon__boolean" />
+        <BooleanTypeIcon className="query-builder-tree__icon query-builder-tree__icon__boolean" />
       );
     } else if (
       type.name === PRIMITIVE_TYPE.NUMBER ||
+      type.name === PRIMITIVE_TYPE.INTEGER ||
       type.name === PRIMITIVE_TYPE.FLOAT ||
       type.name === PRIMITIVE_TYPE.DECIMAL
     ) {
       return (
-        <FaHashtag className="query-builder-tree__icon query-builder-tree__icon__number" />
+        <NumberTypeIcon className="query-builder-tree__icon query-builder-tree__icon__number" />
       );
     } else if (
       type.name === PRIMITIVE_TYPE.DATE ||
@@ -165,7 +165,7 @@ const renderPropertyTypeIcon = (type: Type): React.ReactNode => {
       type.name === PRIMITIVE_TYPE.STRICTDATE
     ) {
       return (
-        <FaClock className="query-builder-tree__icon query-builder-tree__icon__time" />
+        <DateTypeIcon className="query-builder-tree__icon query-builder-tree__icon__time" />
       );
     }
   }
@@ -183,25 +183,24 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
   ) => {
     const { node, level, stepPaddingInRem, onNodeSelect, innerProps } = props;
     const { queryBuilderState } = innerProps;
-    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] = useState(
-      false,
-    );
+    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] =
+      useState(false);
     const applicationStore = useApplicationStore();
     const explorerState = queryBuilderState.explorerState;
     const [, dragConnector, dragPreviewConnector] = useDrag(
       () => ({
-        item:
+        type:
           node instanceof QueryBuilderExplorerTreePropertyNodeData
-            ? {
-                type:
-                  node.type instanceof Enumeration
-                    ? QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.ENUM_PROPERTY
-                    : node.type instanceof Class
-                    ? QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.CLASS_PROPERTY
-                    : QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.PRIMITIVE_PROPERTY,
-                node,
-              }
-            : { type: QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.ROOT },
+            ? node.type instanceof Enumeration
+              ? QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.ENUM_PROPERTY
+              : node.type instanceof Class
+              ? QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.CLASS_PROPERTY
+              : QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.PRIMITIVE_PROPERTY
+            : QUERY_BUILDER_EXPLORER_TREE_DND_TYPE.ROOT,
+        item: (): { node?: QueryBuilderExplorerTreePropertyNodeData } =>
+          node instanceof QueryBuilderExplorerTreePropertyNodeData
+            ? { node }
+            : {},
       }),
       [node],
     );
@@ -220,9 +219,9 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
       node.type instanceof PrimitiveType;
     const nodeExpandIcon = isExpandable ? (
       node.isOpen ? (
-        <FaChevronDown />
+        <ChevronDownIcon />
       ) : (
-        <FaChevronRight />
+        <ChevronRightIcon />
       )
     ) : (
       <div />
@@ -261,7 +260,8 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
           className={clsx(
             'tree-view__node__container query-builder-tree__node__container',
             {
-              'query-builder-tree__node__container--selected-from-context-menu': isSelectedFromContextMenu,
+              'query-builder-tree__node__container--selected-from-context-menu':
+                isSelectedFromContextMenu,
               'query-builder-tree__node__container--unmapped': !node.mapped,
             },
           )}
@@ -303,7 +303,8 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
                 className={clsx(
                   'tree-view__node__label query-builder-tree__node__label query-builder-tree__node__label--with-action',
                   {
-                    'query-builder-tree__node__label--with-preview': allowPreview,
+                    'query-builder-tree__node__label--with-preview':
+                      allowPreview,
                   },
                 )}
               >
@@ -335,7 +336,7 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
                     title="Preview Data"
                     onClick={previewData}
                   >
-                    <FaEye />
+                    <EyeIcon />
                   </button>
                 )}
                 <QueryBuilderPropertyInfoTooltip
@@ -345,7 +346,7 @@ const QueryBuilderExplorerTreeNodeContainer = observer(
                   placement="bottom"
                 >
                   <div className="query-builder-tree__node__action query-builder-tree__node__info">
-                    <FaInfoCircle />
+                    <InfoCircleIcon />
                   </div>
                 </QueryBuilderPropertyInfoTooltip>
               </div>
@@ -504,8 +505,8 @@ export const QueryBuilderExplorerPanel = observer(
     return (
       <div
         className={clsx('panel query-builder__explorer', {
-          'query-builder__explorer--expanded': !queryBuilderState
-            .querySetupState.showSetupPanel,
+          'query-builder__explorer--expanded':
+            !queryBuilderState.querySetupState.showSetupPanel,
         })}
       >
         <div className="panel__header">
@@ -519,7 +520,7 @@ export const QueryBuilderExplorerPanel = observer(
               tabIndex={-1}
               title="Collapse Tree"
             >
-              <FaCompress />
+              <CompressIcon />
             </button>
             <DropdownMenu
               className="panel__header__action"
@@ -553,7 +554,7 @@ export const QueryBuilderExplorerPanel = observer(
                 elevation: 7,
               }}
             >
-              <MdMoreVert
+              <MoreVerticalIcon
                 title="Show Options Menu..."
                 className="query-builder__icon__more-options"
               />

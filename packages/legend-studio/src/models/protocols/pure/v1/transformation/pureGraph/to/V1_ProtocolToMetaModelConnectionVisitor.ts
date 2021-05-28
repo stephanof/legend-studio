@@ -50,7 +50,8 @@ import type { V1_ModelChainConnection } from '../../../model/packageableElements
 import { V1_processPostProcessor } from './helpers/V1_PostProcessorBuilderHelper';
 
 export class V1_ProtocolToMetaModelConnectionVisitor
-  implements V1_ConnectionVisitor<Connection> {
+  implements V1_ConnectionVisitor<Connection>
+{
   context: V1_GraphBuilderContext;
   embeddedConnectionStore?: PackageableElementReference<Store>;
 
@@ -75,16 +76,16 @@ export class V1_ProtocolToMetaModelConnectionVisitor
   visit_ModelChainConnection(
     connection: V1_ModelChainConnection,
   ): ModelChainConnection {
-    if (!this.embeddedConnectionStore || connection.store !== undefined) {
-      assertTrue(
-        connection.store === MODEL_STORE_NAME,
-        `Model chain connection store must be 'ModelStore'`,
-      );
-    } else {
+    if (connection.store === undefined && this.embeddedConnectionStore) {
       assertType(
         this.embeddedConnectionStore.value,
         ModelStore,
         `Embedded Model chain connection store must be 'ModelStore'`,
+      );
+    } else {
+      assertTrue(
+        connection.store === undefined || connection.store === MODEL_STORE_NAME,
+        `Model chain connection store must be 'ModelStore'`,
       );
     }
     const modelConnection = new ModelChainConnection(
@@ -97,16 +98,16 @@ export class V1_ProtocolToMetaModelConnectionVisitor
   }
 
   visit_JsonModelConnection(connection: V1_JsonModelConnection): Connection {
-    if (!this.embeddedConnectionStore || connection.store !== undefined) {
-      assertTrue(
-        connection.store === MODEL_STORE_NAME,
-        `JSON model connection store must be 'ModelStore'`,
-      );
-    } else {
+    if (connection.store === undefined && this.embeddedConnectionStore) {
       assertType(
         this.embeddedConnectionStore.value,
         ModelStore,
         `Embedded JSON model connection store must be 'ModelStore'`,
+      );
+    } else {
+      assertTrue(
+        connection.store === undefined || connection.store === MODEL_STORE_NAME,
+        `JSON model connection store must be 'ModelStore'`,
       );
     }
     assertNonNullable(
@@ -122,16 +123,16 @@ export class V1_ProtocolToMetaModelConnectionVisitor
   }
 
   visit_XmlModelConnection(connection: V1_XmlModelConnection): Connection {
-    if (!this.embeddedConnectionStore || connection.store !== undefined) {
-      assertTrue(
-        connection.store === MODEL_STORE_NAME,
-        `XML model connection store must be 'ModelStore'`,
-      );
-    } else {
+    if (connection.store === undefined && this.embeddedConnectionStore) {
       assertType(
         this.embeddedConnectionStore.value,
         ModelStore,
         `Embedded XML model connection store must be 'ModelStore'`,
+      );
+    } else {
+      assertTrue(
+        connection.store === undefined || connection.store === MODEL_STORE_NAME,
+        `XML model connection store must be 'ModelStore'`,
       );
     }
     assertNonNullable(
@@ -204,7 +205,7 @@ export class V1_ProtocolToMetaModelConnectionVisitor
     );
     const val = new RelationalDatabaseConnection(
       store,
-      (connection.type as unknown) as DatabaseType,
+      connection.type as unknown as DatabaseType,
       V1_processDatasourceSpecification(
         connection.datasourceSpecification,
         this.context,
@@ -214,6 +215,8 @@ export class V1_ProtocolToMetaModelConnectionVisitor
         this.context,
       ),
     );
+    val.timeZone = connection.timeZone;
+    val.quoteIdentifiers = connection.quoteIdentifiers;
     val.postProcessors = connection.postProcessors.map((p) =>
       V1_processPostProcessor(p, this.context),
     );

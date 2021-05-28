@@ -84,6 +84,9 @@ export const DatabaseIcon: React.FC = () => (
     <FaDatabase />
   </div>
 );
+export const TableJoinIcon: React.FC = () => (
+  <div className="icon icon--table-join color--primitive">@</div>
+);
 export const MappingIcon: React.FC = () => (
   <div className="icon color--mapping">
     <FaMap />
@@ -191,13 +194,15 @@ export const getElementTypeIcon = (
       return <GenerationSpecificationIcon />;
     default: {
       if (type) {
-        const extraElementIconGetters = editorStore.applicationStore.pluginManager
-          .getEditorPlugins()
-          .flatMap(
-            (plugin) =>
-              (plugin as DSL_EditorPlugin_Extension).getExtraElementIconGetters?.() ??
-              [],
-          );
+        const extraElementIconGetters =
+          editorStore.applicationStore.pluginManager
+            .getEditorPlugins()
+            .flatMap(
+              (plugin) =>
+                (
+                  plugin as DSL_EditorPlugin_Extension
+                ).getExtraElementIconGetters?.() ?? [],
+            );
         for (const iconGetter of extraElementIconGetters) {
           const elementIcon = iconGetter(type);
           if (elementIcon) {

@@ -23,6 +23,7 @@ import {
   SKIP,
   custom,
   optional,
+  raw,
 } from 'serializr';
 import type { PlainObject } from '@finos/legend-studio-shared';
 import {
@@ -94,6 +95,7 @@ import { V1_AggregationAwarePropertyMapping } from '../../../model/packageableEl
 import type { V1_AbstractFlatDataPropertyMapping } from '../../../model/packageableElements/store/flatData/mapping/V1_AbstractFlatDataPropertyMapping';
 import { V1_XStorePropertyMapping } from '../../../model/packageableElements/mapping/xStore/V1_XStorePropertyMapping';
 import { V1_XStoreAssociationMapping } from '../../../model/packageableElements/mapping/xStore/V1_XStoreAssociationMapping';
+import { V1_RelationalInputData } from '../../../model/packageableElements/store/relational/mapping/V1_RelationalInputData';
 
 enum V1_ClassMappingType {
   OPERATION = 'operation',
@@ -241,7 +243,7 @@ const relationalClassMappingModelSchema = createModelSchema(
   V1_RelationalClassMapping,
   {
     _type: usingConstantValueSchema(V1_ClassMappingType.RELATIONAL),
-    class: primitive(),
+    class: optional(primitive()),
     id: optional(primitive()),
     primaryKey: list(
       custom(
@@ -268,11 +270,8 @@ const relationalPropertyMappingModelSchema = createModelSchema(
       V1_localMappingPropertyInfoModelSchema,
     ),
     property: usingModelSchema(V1_propertyPointerModelSchema),
-    relationalOperation: custom(
-      (val) => V1_serializeRelationalOperationElement(val),
-      (val) => V1_deserializeRelationalOperationElement(val),
-    ),
-    source: primitive(),
+    relationalOperation: raw(),
+    source: optional(primitive()),
     target: optional(primitive()),
   },
 );
@@ -287,14 +286,13 @@ const embeddedRelationalPropertyMappingModelSchema = createModelSchema(
       V1_localMappingPropertyInfoModelSchema,
     ),
     property: usingModelSchema(V1_propertyPointerModelSchema),
-    source: primitive(),
+    source: optional(primitive()), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     target: optional(primitive()),
   },
 );
 
-const otherwiseEmbeddedRelationalPropertyMappingModelSchgema = createModelSchema(
-  V1_OtherwiseEmbeddedRelationalPropertyMapping,
-  {
+const otherwiseEmbeddedRelationalPropertyMappingModelSchgema =
+  createModelSchema(V1_OtherwiseEmbeddedRelationalPropertyMapping, {
     _type: usingConstantValueSchema(
       V1_PropertyMappingType.OTHERWISE_EMBEDDED_RELATIONAL,
     ),
@@ -305,13 +303,12 @@ const otherwiseEmbeddedRelationalPropertyMappingModelSchgema = createModelSchema
       (val) => V1_deserializeRelationalPropertyMapping(val),
     ),
     property: usingModelSchema(V1_propertyPointerModelSchema),
-    source: primitive(),
+    source: optional(primitive()), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     target: optional(primitive()),
     localMappingProperty: usingModelSchema(
       V1_localMappingPropertyInfoModelSchema,
     ),
-  },
-);
+  });
 
 const inlineEmbeddedPropertyMappingModelSchema = createModelSchema(
   V1_InlineEmbeddedPropertyMapping,
@@ -324,7 +321,7 @@ const inlineEmbeddedPropertyMappingModelSchema = createModelSchema(
       V1_localMappingPropertyInfoModelSchema,
     ),
     property: usingModelSchema(V1_propertyPointerModelSchema),
-    source: primitive(),
+    source: optional(primitive()), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     setImplementationId: primitive(),
     target: optional(primitive()),
   },
@@ -605,11 +602,19 @@ function V1_deserializeClassMapping(
 enum V1_InputDataType {
   OBJECT = 'object',
   FLAT_DATA = 'flatData',
+  RELATIONAL = 'relational',
 }
 
 enum V1_MappingTestAssertType {
   EXPECTED_OUTPUT_MAPPING_TEST_ASSERT = 'expectedOutputMappingTestAssert',
 }
+
+const V1_objectInputData = createModelSchema(V1_ObjectInputData, {
+  _type: usingConstantValueSchema(V1_InputDataType.OBJECT),
+  data: primitive(),
+  inputType: primitive(),
+  sourceClass: primitive(),
+});
 
 const V1_flatDataInputData = createModelSchema(V1_FlatDataInputData, {
   _type: usingConstantValueSchema(V1_InputDataType.FLAT_DATA),
@@ -619,11 +624,11 @@ const V1_flatDataInputData = createModelSchema(V1_FlatDataInputData, {
   ),
 });
 
-const V1_objectInputData = createModelSchema(V1_ObjectInputData, {
-  _type: usingConstantValueSchema(V1_InputDataType.OBJECT),
+const V1_relationalInputData = createModelSchema(V1_RelationalInputData, {
+  _type: usingConstantValueSchema(V1_InputDataType.RELATIONAL),
   data: primitive(),
+  database: primitive(),
   inputType: primitive(),
-  sourceClass: primitive(),
 });
 
 const V1_expectedOutputMappingTestAssertModelSchema = createModelSchema(
@@ -643,6 +648,8 @@ const V1_serializeInputData = (
     return serialize(V1_objectInputData, protocol);
   } else if (protocol instanceof V1_FlatDataInputData) {
     return serialize(V1_flatDataInputData, protocol);
+  } else if (protocol instanceof V1_RelationalInputData) {
+    return serialize(V1_relationalInputData, protocol);
   }
   return SKIP;
 };
@@ -655,6 +662,8 @@ const V1_deserializeInputData = (
       return deserialize(V1_objectInputData, json);
     case V1_InputDataType.FLAT_DATA:
       return deserialize(V1_flatDataInputData, json);
+    case V1_InputDataType.RELATIONAL:
+      return deserialize(V1_relationalInputData, json);
     default:
       return SKIP;
   }
@@ -900,7 +909,7 @@ const enumValueMappingModelSchema = createModelSchema(V1_EnumValueMapping, {
     custom(serializeEnumValueMappingSourceValue, (value, context) =>
       V1_deserializeEnumValueMappingSourceValue(
         value,
-        (context as unknown) as { args?: V1_EnumerationMapping },
+        context as unknown as { args?: V1_EnumerationMapping },
       ),
     ),
   ), //TODO look into why args is private in context

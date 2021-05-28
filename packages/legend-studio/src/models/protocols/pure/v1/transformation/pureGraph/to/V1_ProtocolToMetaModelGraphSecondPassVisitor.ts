@@ -81,7 +81,8 @@ import { V1_processSection } from '../../../transformation/pureGraph/to/helpers/
 import type { V1_ServiceStore } from '../../../model/packageableElements/store/relational/V1_ServiceStore';
 
 export class V1_ProtocolToMetaModelGraphSecondPassVisitor
-  implements V1_PackageableElementVisitor<void> {
+  implements V1_PackageableElementVisitor<void>
+{
   context: V1_GraphBuilderContext;
 
   constructor(context: V1_GraphBuilderContext) {
@@ -138,10 +139,15 @@ export class V1_ProtocolToMetaModelGraphSecondPassVisitor
       this.context.graph.buildPackageString(element.package, element.name),
     );
     measure.setCanonicalUnit(
-      V1_processUnit(element.canonicalUnit, measure, this.context.graph),
+      V1_processUnit(
+        element.canonicalUnit,
+        measure,
+        this.context.graph,
+        this.context,
+      ),
     );
     measure.nonCanonicalUnits = element.nonCanonicalUnits.map((unit) =>
-      V1_processUnit(unit, measure, this.context.currentSubGraph),
+      V1_processUnit(unit, measure, this.context.currentSubGraph, this.context),
     );
   }
 
@@ -295,9 +301,8 @@ export class V1_ProtocolToMetaModelGraphSecondPassVisitor
       this.context.graph.buildPackageString(element.package, element.name),
     );
     fileGeneration.setType(element.type);
-    fileGeneration.configurationProperties = element.configurationProperties.map(
-      V1_processConfigurationProperty,
-    );
+    fileGeneration.configurationProperties =
+      element.configurationProperties.map(V1_processConfigurationProperty);
     fileGeneration.setGenerationOutputPath(element.generationOutputPath);
     fileGeneration.scopeElements = element.scopeElements.map((scopeElement) =>
       V1_processScopeElement(scopeElement, this.context),

@@ -41,7 +41,8 @@ import type { GenericTypeReference } from './GenericTypeReference';
 import { GenericTypeExplicitReference } from './GenericTypeReference';
 
 export class DerivedProperty
-  implements AbstractProperty, AnnotatedElement, Hashable, Stubable {
+  implements AbstractProperty, AnnotatedElement, Hashable, Stubable
+{
   uuid = uuid();
   owner: PropertyOwner; // readonly
   name: string;
@@ -49,9 +50,8 @@ export class DerivedProperty
   multiplicity: Multiplicity;
   stereotypes: StereotypeReference[] = [];
   taggedValues: TaggedValue[] = [];
-  // Lambda
-  body?: object;
-  parameters?: object;
+  body?: object; // @MARKER GENERATED MODEL DISCREPANCY --- Studio does not process lambda
+  parameters?: object; // @MARKER GENERATED MODEL DISCREPANCY --- Studio does not process lambda
 
   constructor(
     name: string,

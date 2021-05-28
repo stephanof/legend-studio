@@ -28,7 +28,6 @@ import {
 import { PureInstanceSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/store/modelToModel/mapping/PureInstanceSetImplementation';
 import { FlatDataInstanceSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/store/flatData/mapping/FlatDataInstanceSetImplementation';
 import { RootRelationalInstanceSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/mapping/RootRelationalInstanceSetImplementation';
-import { RawLambda } from '../../../../../../metamodels/pure/model/rawValueSpecification/RawLambda';
 import { OptionalPackageableElementImplicitReference } from '../../../../../../metamodels/pure/model/packageableElements/PackageableElementReference';
 import { InferableMappingElementRootExplicitValue } from '../../../../../../metamodels/pure/model/packageableElements/mapping/InferableMappingElementRoot';
 import type { V1_GraphBuilderContext } from '../../../transformation/pureGraph/to/V1_GraphBuilderContext';
@@ -43,9 +42,12 @@ import { V1_getInferredClassMappingId } from '../../../transformation/pureGraph/
 import { AggregationAwareSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/mapping/aggregationAware/AggregationAwareSetImplementation';
 import type { InstanceSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/mapping/InstanceSetImplementation';
 import { V1_processAggregateContainer } from './helpers/V1_AggregationAwareClassMappingBuilderHelper';
+import { V1_rawLambdaBuilderWithResolver } from './helpers/V1_RawLambdaResolver';
+import { V1_processRelationalMappingFilter } from './helpers/V1_RelationalClassMappingBuilderHelper';
 
 export class V1_ProtocolToMetaModelClassMappingFirstPassVisitor
-  implements V1_ClassMappingVisitor<SetImplementation> {
+  implements V1_ClassMappingVisitor<SetImplementation>
+{
   context: V1_GraphBuilderContext;
   parent: Mapping;
 
@@ -103,11 +105,15 @@ export class V1_ProtocolToMetaModelClassMappingFirstPassVisitor
         srcClassReference?.value,
         classMapping.srcClass,
         this.context.section,
-        srcClassReference?.isResolvedFromAutoImports,
+        srcClassReference?.isInferred,
       ),
     );
     pureInstanceSetImplementation.filter = classMapping.filter
-      ? new RawLambda([], classMapping.filter.body)
+      ? V1_rawLambdaBuilderWithResolver(
+          this.context,
+          [],
+          classMapping.filter.body,
+        )
       : undefined;
     return pureInstanceSetImplementation;
   }
@@ -124,18 +130,22 @@ export class V1_ProtocolToMetaModelClassMappingFirstPassVisitor
       'Flat-data class mapping root flag is missing',
     );
     const targetClass = this.context.resolveClass(classMapping.class);
-    const sourceRootRecordType = this.context.resolveRootFlatDataRecordType(
-      classMapping,
-    );
-    const flatDataInstanceSetImplementation = new FlatDataInstanceSetImplementation(
-      V1_getInferredClassMappingId(targetClass.value, classMapping),
-      this.parent,
-      targetClass,
-      InferableMappingElementRootExplicitValue.create(classMapping.root),
-      sourceRootRecordType,
-    );
+    const sourceRootRecordType =
+      this.context.resolveRootFlatDataRecordType(classMapping);
+    const flatDataInstanceSetImplementation =
+      new FlatDataInstanceSetImplementation(
+        V1_getInferredClassMappingId(targetClass.value, classMapping),
+        this.parent,
+        targetClass,
+        InferableMappingElementRootExplicitValue.create(classMapping.root),
+        sourceRootRecordType,
+      );
     flatDataInstanceSetImplementation.filter = classMapping.filter
-      ? new RawLambda([], classMapping.filter.body)
+      ? V1_rawLambdaBuilderWithResolver(
+          this.context,
+          [],
+          classMapping.filter.body,
+        )
       : undefined;
     return flatDataInstanceSetImplementation;
   }
@@ -158,12 +168,16 @@ export class V1_ProtocolToMetaModelClassMappingFirstPassVisitor
       'Relational class mapping root flag is missing',
     );
     const targetClass = this.context.resolveClass(classMapping.class);
-    const rootRelationalInstanceSetImplementation = new RootRelationalInstanceSetImplementation(
-      V1_getInferredClassMappingId(targetClass.value, classMapping),
-      this.parent,
-      targetClass,
-      InferableMappingElementRootExplicitValue.create(classMapping.root),
-    );
+    const rootRelationalInstanceSetImplementation =
+      new RootRelationalInstanceSetImplementation(
+        V1_getInferredClassMappingId(targetClass.value, classMapping),
+        this.parent,
+        targetClass,
+        InferableMappingElementRootExplicitValue.create(classMapping.root),
+      );
+    rootRelationalInstanceSetImplementation.filter = classMapping.filter
+      ? V1_processRelationalMappingFilter(classMapping.filter, this.context)
+      : undefined;
     return rootRelationalInstanceSetImplementation;
   }
 
@@ -172,30 +186,31 @@ export class V1_ProtocolToMetaModelClassMappingFirstPassVisitor
   ): SetImplementation {
     assertNonEmptyString(
       classMapping.class,
-      'Aggregation Aware class mapping class is missing',
+      'Aggregation-aware class mapping class is missing',
     );
     assertNonNullable(
       classMapping.root,
-      'Aggregation Aware class mapping root flag is missing',
+      'Aggregation-aware class mapping root flag is missing',
     );
     const targetClass = this.context.resolveClass(classMapping.class);
     const mapping = this.context.graph.getMapping(this.parent.path);
-    const aggragetionAwareInstanceSetImplementation = new AggregationAwareSetImplementation(
-      V1_getInferredClassMappingId(targetClass.value, classMapping),
-      this.parent,
-      targetClass,
-      InferableMappingElementRootExplicitValue.create(classMapping.root),
-      classMapping.mainSetImplementation.accept_ClassMappingVisitor(
-        new V1_ProtocolToMetaModelClassMappingFirstPassVisitor(
-          this.context,
-          mapping,
-        ),
-      ) as InstanceSetImplementation,
-    );
-    aggragetionAwareInstanceSetImplementation.aggregateSetImplementations = classMapping.aggregateSetImplementations.map(
-      (setImplementation) =>
+    const aggragetionAwareInstanceSetImplementation =
+      new AggregationAwareSetImplementation(
+        V1_getInferredClassMappingId(targetClass.value, classMapping),
+        this.parent,
+        targetClass,
+        InferableMappingElementRootExplicitValue.create(classMapping.root),
+        classMapping.mainSetImplementation.accept_ClassMappingVisitor(
+          new V1_ProtocolToMetaModelClassMappingFirstPassVisitor(
+            this.context,
+            mapping,
+          ),
+        ) as InstanceSetImplementation,
+      );
+    aggragetionAwareInstanceSetImplementation.aggregateSetImplementations =
+      classMapping.aggregateSetImplementations.map((setImplementation) =>
         V1_processAggregateContainer(setImplementation, this.context, mapping),
-    );
+      );
     return aggragetionAwareInstanceSetImplementation;
   }
 }

@@ -88,6 +88,7 @@ const LambdaEditorInner = observer(
     forceBackdrop: boolean;
     forceExpansion?: boolean;
     useBaseTextEditorSettings?: boolean;
+    hideErrorBar?: boolean;
   }) => {
     const {
       className,
@@ -100,21 +101,20 @@ const LambdaEditorInner = observer(
       forceBackdrop,
       forceExpansion,
       useBaseTextEditorSettings,
+      hideErrorBar,
     } = props;
     const editorStore = useEditorStore();
     const applicationStore = useApplicationStore();
-    const onDidChangeModelContentEventDisposer = useRef<
-      IDisposable | undefined
-    >(undefined);
+    const onDidChangeModelContentEventDisposer =
+      useRef<IDisposable | undefined>(undefined);
     const onKeyDownEventDisposer = useRef<IDisposable | undefined>(undefined);
     const value = lambdaEditorState.lambdaString;
     const parserError = lambdaEditorState.parserError;
     const compilationError = lambdaEditorState.compilationError;
     const selectTypeLabel = (): void => onExpectedTypeLabelSelect?.();
     const [isExpanded, setExpanded] = useState(Boolean(forceExpansion));
-    const [editor, setEditor] = useState<
-      monacoEditorAPI.IStandaloneCodeEditor | undefined
-    >();
+    const [editor, setEditor] =
+      useState<monacoEditorAPI.IStandaloneCodeEditor | undefined>();
     const textInput = useRef<HTMLDivElement>(null);
 
     const transformLambdaToString = (pretty: boolean): Promise<void> => {
@@ -145,23 +145,24 @@ const LambdaEditorInner = observer(
     useEffect(() => {
       if (!editor && textInput.current) {
         const element = textInput.current;
-        const lambdaEditorOptions: monacoEditorAPI.IStandaloneEditorConstructionOptions = useBaseTextEditorSettings
-          ? {}
-          : {
-              renderLineHighlight: 'none',
-              lineHeight: 24,
-              overviewRulerBorder: false, // hide overview ruler (no current way to hide this completely yet)
-              overviewRulerLanes: 0,
-              hideCursorInOverviewRuler: false,
-              glyphMargin: false,
-              folding: false,
-              minimap: { enabled: false },
-              lineNumbers: 'off',
-              lineNumbersMinChars: 0,
-              lineDecorationsWidth: 5,
-              snippetSuggestions: 'none',
-              scrollbar: { vertical: 'hidden' },
-            };
+        const lambdaEditorOptions: monacoEditorAPI.IStandaloneEditorConstructionOptions =
+          useBaseTextEditorSettings
+            ? {}
+            : {
+                renderLineHighlight: 'none',
+                lineHeight: 24,
+                overviewRulerBorder: false, // hide overview ruler (no current way to hide this completely yet)
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: false,
+                glyphMargin: false,
+                folding: false,
+                minimap: { enabled: false },
+                lineNumbers: 'off',
+                lineNumbersMinChars: 0,
+                lineDecorationsWidth: 5,
+                snippetSuggestions: 'none',
+                scrollbar: { vertical: 'hidden' },
+              };
         const _editor = monacoEditorAPI.create(element, {
           ...baseTextEditorSettings,
           language: EDITOR_LANGUAGE.PURE,
@@ -220,8 +221,8 @@ const LambdaEditorInner = observer(
        * 2. Type something in the lambda editor, the transform function is `undefined` and does not update the underlying lambda
        */
       onDidChangeModelContentEventDisposer.current?.dispose();
-      onDidChangeModelContentEventDisposer.current = editor.onDidChangeModelContent(
-        () => {
+      onDidChangeModelContentEventDisposer.current =
+        editor.onDidChangeModelContent(() => {
           const currentVal = editor.getValue();
           /**
            * Avoid unecessary setting of lambda string. Also, this prevents clearing the non-parser error on first render.
@@ -250,8 +251,7 @@ const LambdaEditorInner = observer(
           transformStringToLambda?.()?.catch(
             applicationStore.alertIllegalUnhandledError,
           );
-        },
-      );
+        });
 
       // set hotkeys (before calling the action, finish parsing the current text value)
       onKeyDownEventDisposer.current?.dispose(); // dispose to avoid trigger multiple compilation/generation/etc.
@@ -269,13 +269,14 @@ const LambdaEditorInner = observer(
        * parsing passes before actually calling those global operations.
        */
       onKeyDownEventDisposer.current = editor.onKeyDown((event) => {
-        const applicableLambdaEditorHotkeyConfigurations = editorStore.applicationStore.pluginManager
-          .getEditorPlugins()
-          .flatMap(
-            (plugin) =>
-              plugin.getExtraLambdaEditorHotkeyConfigurations?.() ?? [],
-          )
-          .filter((configuration) => configuration.eventMatcher(event));
+        const applicableLambdaEditorHotkeyConfigurations =
+          editorStore.applicationStore.pluginManager
+            .getEditorPlugins()
+            .flatMap(
+              (plugin) =>
+                plugin.getExtraLambdaEditorHotkeyConfigurations?.() ?? [],
+            )
+            .filter((configuration) => configuration.eventMatcher(event));
         const enableGlobalAction =
           !applicableLambdaEditorHotkeyConfigurations.length ||
           applicableLambdaEditorHotkeyConfigurations.every(
@@ -378,7 +379,8 @@ const LambdaEditorInner = observer(
                   className={clsx(
                     'lambda-editor__editor__expected-return-type lambda-editor__editor__expected-return-type--clickable',
                     {
-                      'lambda-editor__editor__expected-return-type--highlighted': matchedExpectedType?.(),
+                      'lambda-editor__editor__expected-return-type--highlighted':
+                        matchedExpectedType?.(),
                     },
                   )}
                   onClick={selectTypeLabel}
@@ -393,7 +395,8 @@ const LambdaEditorInner = observer(
                   className={clsx(
                     'lambda-editor__editor__expected-return-type',
                     {
-                      'lambda-editor__editor__expected-return-type--highlighted': matchedExpectedType?.(),
+                      'lambda-editor__editor__expected-return-type--highlighted':
+                        matchedExpectedType?.(),
                     },
                   )}
                 >
@@ -414,15 +417,21 @@ const LambdaEditorInner = observer(
             </button>
           )}
         </div>
-        <LambdaErrorFeedback
-          error={parserError ?? compilationError}
-          discardChanges={discardChanges}
-        />
+        {!hideErrorBar && (
+          <LambdaErrorFeedback
+            error={parserError ?? compilationError}
+            discardChanges={discardChanges}
+          />
+        )}
       </>
     );
   },
 );
 
+/**
+ * This is not strictly meant for lambda. The idea is to create an editor that allows
+ * editing _something_ but allows user to edit via text.
+ */
 export const LambdaEditor = observer(
   (props: {
     className?: string;
@@ -439,6 +448,7 @@ export const LambdaEditor = observer(
     forceBackdrop: boolean;
     forceExpansion?: boolean;
     useBaseTextEditorSettings?: boolean;
+    hideErrorBar?: boolean;
   }) => {
     const {
       className,
@@ -450,6 +460,7 @@ export const LambdaEditor = observer(
       matchedExpectedType,
       forceExpansion,
       useBaseTextEditorSettings,
+      hideErrorBar,
     } = props;
     const debouncedTransformStringToLambda = useMemo(
       () =>
@@ -499,6 +510,7 @@ export const LambdaEditor = observer(
         forceBackdrop={forceBackdrop}
         forceExpansion={forceExpansion}
         useBaseTextEditorSettings={useBaseTextEditorSettings}
+        hideErrorBar={hideErrorBar}
       />
     );
   },

@@ -112,7 +112,7 @@ export const testMappingRoundtrip = [
                 property: 'fullName',
               },
               explodeProperty: false,
-              source: 'cay',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -230,7 +230,7 @@ export const testMappingRoundtrip = [
                 class: 'tClass',
                 property: 'fullName',
               },
-              source: 'cay',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -348,7 +348,7 @@ export const testMappingRoundtrip = [
                 class: 'tClass',
                 property: 'name',
               },
-              source: 'cay',
+              source: '',
               explodeProperty: true,
               transform: {
                 _type: 'lambda',
@@ -587,15 +587,13 @@ export const testMappingRoundtrip = [
           inputData: [
             {
               _type: 'object',
-              data:
-                '{"oneName":"oneName 2","anotherName":"anotherName 16","oneDate":"2020-02-05","anotherDate":"2020-04-13","oneNumber":24,"anotherNumber":29}',
+              data: '{"oneName":"oneName 2","anotherName":"anotherName 16","oneDate":"2020-02-05","anotherDate":"2020-04-13","oneNumber":24,"anotherNumber":29}',
               inputType: 'JSON',
               sourceClass: 'tClass',
             },
             {
               _type: 'object',
-              data:
-                '{"oneName":"oneName 2","anotherName":"anotherName 16","oneDate":"2020-02-05","anotherDate":"2020-04-13","oneNumber":24,"anotherNumber":29}',
+              data: '{"oneName":"oneName 2","anotherName":"anotherName 16","oneDate":"2020-02-05","anotherDate":"2020-04-13","oneNumber":24,"anotherNumber":29}',
               inputType: 'XML',
               sourceClass: 'tClass',
             },
@@ -837,7 +835,7 @@ export const testLocalPropertyMapping = [
                   'test::crossPropertyMappingWithLocalProperties_[object Object]firmId',
                 property: 'firmId',
               },
-              source: 'p',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -860,7 +858,7 @@ export const testLocalPropertyMapping = [
                 class: 'test::Person',
                 property: 'name',
               },
-              source: 'p',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1016,7 +1014,7 @@ export const testAggregationAwareMappingRoundtrip = [
                 class: 'test::FiscalCalendar',
                 property: 'date',
               },
-              source: 'b',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1041,7 +1039,7 @@ export const testAggregationAwareMappingRoundtrip = [
                 class: 'test::FiscalCalendar',
                 property: 'fiscalYear',
               },
-              source: 'b',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1066,7 +1064,7 @@ export const testAggregationAwareMappingRoundtrip = [
                 class: 'test::FiscalCalendar',
                 property: 'fiscalMonth',
               },
-              source: 'b',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1091,7 +1089,7 @@ export const testAggregationAwareMappingRoundtrip = [
                 class: 'test::FiscalCalendar',
                 property: 'fiscalQtr',
               },
-              source: 'b',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1189,7 +1187,7 @@ export const testAggregationAwareMappingRoundtrip = [
                       class: 'test::Sales',
                       property: 'salesDate',
                     },
-                    source: 'a',
+                    source: '',
                     target: 'b',
                     transform: {
                       _type: 'lambda',
@@ -1215,7 +1213,7 @@ export const testAggregationAwareMappingRoundtrip = [
                       class: 'test::Sales',
                       property: 'revenue',
                     },
-                    source: 'a',
+                    source: '',
                     transform: {
                       _type: 'lambda',
                       body: [
@@ -1253,7 +1251,7 @@ export const testAggregationAwareMappingRoundtrip = [
                   class: 'test::Sales',
                   property: 'salesDate',
                 },
-                source: 'a',
+                source: '',
                 target: 'b',
                 transform: {
                   _type: 'lambda',
@@ -1279,7 +1277,7 @@ export const testAggregationAwareMappingRoundtrip = [
                   class: 'test::Sales',
                   property: 'revenue',
                 },
-                source: 'a',
+                source: '',
                 transform: {
                   _type: 'lambda',
                   body: [

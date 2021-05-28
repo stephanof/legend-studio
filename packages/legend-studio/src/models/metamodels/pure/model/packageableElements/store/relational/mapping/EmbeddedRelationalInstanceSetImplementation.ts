@@ -48,7 +48,8 @@ export class EmbeddedRelationalInstanceSetImplementation
   implements
     EmbeddedSetImplementation,
     RelationalInstanceSetImplementation,
-    Hashable {
+    Hashable
+{
   root = InferableMappingElementRootExplicitValue.create(false);
   isEmbedded = true;
   id: InferableMappingElementIdValue;
@@ -135,7 +136,11 @@ export class EmbeddedRelationalInstanceSetImplementation
       this.class.valueForSerialization,
       hashArray(this.primaryKey),
       //skip `root` since we disregard it in embedded property mappings
-      hashArray(this.propertyMappings),
+      hashArray(
+        this.propertyMappings.filter(
+          (propertyMapping) => !propertyMapping.isStub,
+        ),
+      ),
     ]);
   }
 }

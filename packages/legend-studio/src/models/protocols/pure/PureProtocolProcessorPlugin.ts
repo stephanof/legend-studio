@@ -18,14 +18,11 @@ import { AbstractPlugin } from '@finos/legend-studio-shared';
 import type { PlainObject } from '@finos/legend-studio-shared';
 import type { PackageableElement } from '../../metamodels/pure/model/packageableElements/PackageableElement';
 import type { V1_PackageableElement } from './v1/model/packageableElements/V1_PackageableElement';
-import type { V1_DepdendencyProcessingContext } from './v1/transformation/pureGraph/to/dependencyDisambiguator/V1_DependencyDisambiguatorHelper';
 import type { V1_ElementBuilder } from './v1/transformation/pureGraph/to/V1_ElementBuilder';
 import type { V1_PureModelContextData } from './v1/model/context/V1_PureModelContextData';
-
-export type V1_ElementProtocolDependencyDisambiguator = (
-  protocol: V1_PackageableElement,
-  dependencyProcessingContext: V1_DepdendencyProcessingContext,
-) => void;
+import type { PureModel } from '../../metamodels/pure/graph/PureModel';
+import type { Mapping } from '../../metamodels/pure/model/packageableElements/mapping/Mapping';
+import type { Runtime } from '../../metamodels/pure/model/packageableElements/runtime/Runtime';
 
 export type V1_ElementProtocolClassifierPathGetter = (
   protocol: V1_PackageableElement,
@@ -43,14 +40,19 @@ export type V1_ElementTransformer = (
   metamodel: PackageableElement,
 ) => V1_PackageableElement | undefined;
 
+export type V1_ExecutionInputGetter = (
+  graph: PureModel,
+  mapping: Mapping,
+  runtime: Runtime,
+  protocolGraph: V1_PureModelContextData,
+) => V1_PackageableElement[];
+
 export abstract class PureProtocolProcessorPlugin extends AbstractPlugin {
   private readonly _$nominalTypeBrand!: 'PureProtocolProcessorPlugin';
 
   V1_getExtraSystemModels?(): PlainObject<V1_PureModelContextData>[];
 
   V1_getExtraElementBuilders?(): V1_ElementBuilder<V1_PackageableElement>[];
-
-  V1_getExtraElementProtocolDependencyDisambiguators?(): V1_ElementProtocolDependencyDisambiguator[];
 
   V1_getExtraElementClassifierPathGetters?(): V1_ElementProtocolClassifierPathGetter[];
 
@@ -61,4 +63,12 @@ export abstract class PureProtocolProcessorPlugin extends AbstractPlugin {
   V1_getExtraElementTransformers?(): V1_ElementTransformer[];
 
   V1_getExtraSourceInformationKeys?(): string[];
+
+  /**
+   * Used to specify any additional packageable elements added to the graph that is
+   * used when executing a query against the engine server. We prune the graph to avoid
+   * sending the server additional elements not needed for execution. This would provide a mechanism
+   * to add more elements in this reduced graph.
+   */
+  V1_getExtraExecutionInputGetters?(): V1_ExecutionInputGetter[];
 }

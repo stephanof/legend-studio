@@ -44,12 +44,13 @@ export enum QUERY_BUILDER_PROJECTION_DND_TYPE {
 }
 
 export interface QueryBuilderProjectionColumnDragSource {
-  type: QUERY_BUILDER_PROJECTION_DND_TYPE;
   columnState: QueryBuilderProjectionColumnState;
 }
 
-export type QueryBuilderProjectionDropTarget = QueryBuilderExplorerTreeDragSource;
-export type QueryBuilderProjectionColumnRearrangeDropTarget = QueryBuilderProjectionColumnDragSource;
+export type QueryBuilderProjectionDropTarget =
+  QueryBuilderExplorerTreeDragSource;
+export type QueryBuilderProjectionColumnRearrangeDropTarget =
+  QueryBuilderProjectionColumnDragSource;
 
 export class QueryBuilderProjectionColumnState {
   uuid = uuid();

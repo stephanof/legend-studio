@@ -128,9 +128,10 @@ export class DerivedPropertyExpressionEditorState {
     );
     this.initDerivedParameters();
     if (!parametersBuilt) {
-      this.propertyExpression.parametersValues = this.propertyExpression.parametersValues.concat(
-        this.buildDerivedPropertyParameters(),
-      );
+      this.propertyExpression.parametersValues =
+        this.propertyExpression.parametersValues.concat(
+          this.buildDerivedPropertyParameters(),
+        );
     }
   }
 
@@ -192,6 +193,14 @@ export class QueryBuilderPropertyEditorState {
   propertyExpression: AbstractPropertyExpression;
   isEditingDerivedProperty = false;
   propertyExpressionStates: DerivedPropertyExpressionEditorState[] = [];
+  /**
+   * If at least one property in the chain is of multiplicity greater than 1,
+   * the property might have multiple values and can cause row explosions.
+   *
+   * In other words, saying `$x.b == 1` is not quite accurate if `$x.b` is multi
+   * is multi. Instead, we should do something like `$x.b->exists($x1 | $x1 == 1)`
+   */
+  requiresExistsHandling = false;
 
   constructor(
     editorStore: EditorStore,
@@ -231,24 +240,34 @@ export class QueryBuilderPropertyEditorState {
   buildPropertyExpressionStates(
     expressionProcessed?: boolean,
   ): DerivedPropertyExpressionEditorState[] {
+    let canHaveMultipleValues = false;
     let hasDerivedPropertyInChain = false;
     const result: DerivedPropertyExpressionEditorState[] = [];
-    let currentExpression: ValueSpecification | undefined = this
-      .propertyExpression;
+    let currentExpression: ValueSpecification | undefined =
+      this.propertyExpression;
     while (currentExpression instanceof AbstractPropertyExpression) {
+      // Check if the property chain can results in column that have multiple values
+      if (
+        currentExpression.func.multiplicity.upperBound === undefined ||
+        currentExpression.func.multiplicity.upperBound > 1
+      ) {
+        canHaveMultipleValues = true;
+      }
       if (currentExpression.func instanceof DerivedProperty) {
         hasDerivedPropertyInChain = true;
-        const derivedPropertyExpressionState = new DerivedPropertyExpressionEditorState(
-          this.editorStore,
-          currentExpression,
-          expressionProcessed,
-        );
+        const derivedPropertyExpressionState =
+          new DerivedPropertyExpressionEditorState(
+            this.editorStore,
+            currentExpression,
+            expressionProcessed,
+          );
         result.push(derivedPropertyExpressionState);
       }
       currentExpression = getNullableFirstElement(
         currentExpression.parametersValues,
       );
     }
+    this.requiresExistsHandling = canHaveMultipleValues;
     this.hasDerivedPropertyInChain = hasDerivedPropertyInChain;
     return result.reverse();
   }

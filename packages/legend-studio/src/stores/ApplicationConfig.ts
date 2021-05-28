@@ -98,7 +98,15 @@ class ApplicationCoreOptions {
    * to figure out how we want to store this element in SDLC.
    */
   EXPERIMENTAL__enableFullGrammarImportSupport = false;
-
+  /**
+   * Allows disabling of resolving element paths inside a RawLambda
+   *
+   * NOTE: when we move to save imports as part of the user's project, this feature
+   * will no longer be needed and can be removed. This flag will only be relevant if
+   * EXPERIMENTAL__enableFullGrammarImportSupport is set to false since full grammar import support
+   * will not require a lambda resolver.
+   */
+  TEMPORARY__disableRawLambdaResolver = false;
   /**
    * Allows disabling service registration as the Legend service operational infrastructure
    * has not been open-sourced yet.
@@ -125,6 +133,7 @@ class ApplicationCoreOptions {
       TEMPORARY__useSDLCProductionProjectsOnly: optional(primitive()),
       EXPERIMENTAL__enableFullGrammarImportSupport: optional(primitive()),
       TEMPORARY__disableServiceRegistration: optional(primitive()),
+      TEMPORARY__disableRawLambdaResolver: optional(primitive()),
       TEMPORARY__serviceRegistrationConfig: list(
         custom(
           (value) => SKIP,
@@ -155,6 +164,7 @@ export interface ConfigurationData {
   appName: string;
   env: string;
   sdlc: { url: string } | SDLCServerOption[];
+  metadata: { url: string };
   engine: { url: string };
   documentation: { url: string };
   options?: Record<PropertyKey, unknown>;
@@ -174,6 +184,7 @@ export class ApplicationConfig {
   _sdlcServerKey: string | undefined;
   sdlcServerOptions: SDLCServerOption[] = [];
   readonly engineServerUrl: string;
+  readonly metadataServerUrl: string;
   readonly options = new ApplicationCoreOptions();
 
   // TODO: consider modifying and/or moving this out when we refactor `version.json`
@@ -244,6 +255,14 @@ export class ApplicationConfig {
     this.engineServerUrl = guaranteeNonEmptyString(
       configData.engine.url,
       `Application configuration failure: 'engine.url' field is missing or empty`,
+    );
+    assertNonNullable(
+      configData.metadata,
+      `Application configuration failure: 'metadata' field is missing`,
+    );
+    this.metadataServerUrl = guaranteeNonEmptyString(
+      configData.metadata.url,
+      `Application configuration failure: 'metadata.url' field is missing or empty`,
     );
     assertNonNullable(
       configData.documentation,

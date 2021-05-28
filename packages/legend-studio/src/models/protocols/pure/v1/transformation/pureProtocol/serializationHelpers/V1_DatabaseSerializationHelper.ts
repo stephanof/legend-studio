@@ -110,7 +110,7 @@ enum V1_RelationalOperationElementType {
   TABLE_ALIAS_COLUMN = 'column',
 }
 
-const V1_TablePtrType = 'Table';
+const V1_TABLE_POINTER_TYPE = 'Table';
 
 enum V1_RelationalDataTypeType {
   VARCHAR = 'Varchar',
@@ -309,8 +309,9 @@ const columnModelSchema = createModelSchema(V1_Column, {
 });
 
 export const V1_tablePtrModelSchema = createModelSchema(V1_TablePtr, {
-  _type: usingConstantValueSchema(V1_TablePtrType),
+  _type: usingConstantValueSchema(V1_TABLE_POINTER_TYPE),
   database: primitive(),
+  mainTableDb: primitive(), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   schema: primitive(),
   table: primitive(),
 });
@@ -322,7 +323,7 @@ const V1_filterPointerModelSchema = createModelSchema(V1_FilterPointer, {
 
 const V1_joinPointerModelSchema = createModelSchema(V1_JoinPointer, {
   db: primitive(),
-  joinType: primitive(),
+  joinType: optional(primitive()),
   name: primitive(),
 });
 
@@ -386,7 +387,7 @@ const V1_tableAliasColumnModelSchema = createModelSchema(V1_TableAliasColumn, {
 
 export function V1_serializeRelationalOperationElement(
   protocol: V1_RelationalOperationElement,
-): V1_RelationalOperationElement {
+): PlainObject<V1_RelationalOperationElement> {
   if (protocol instanceof V1_DynaFunc) {
     return serialize(V1_dynaFuncModelSchema, protocol);
   } else if (protocol instanceof V1_ElementWithJoins) {
@@ -466,7 +467,7 @@ const V1_joinModelSchema = createModelSchema(V1_Join, {
     (val) => V1_serializeRelationalOperationElement(val),
     (val) => V1_deserializeRelationalOperationElement(val),
   ),
-  target: primitive(),
+  target: optional(primitive()),
 });
 
 const V1_filterModelSchema = createModelSchema(V1_Filter, {
@@ -519,6 +520,7 @@ const V1_setupRelationalDatabaseConnectionModelSchema = (
       (val) => V1_deserializeDatasourceSpecification(val, plugins),
     ),
     store: alias('element', primitive()),
+    quoteIdentifiers: optional(primitive()),
     timeZone: optional(primitive()),
     postProcessors: custom(
       (values) =>

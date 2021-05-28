@@ -44,7 +44,8 @@ import type {
 } from '../../../model/rawValueSpecification/V1_RawGraphFetchTree';
 
 export class V1_ProtocolToMetaModelRawValueSpecificationVisitor
-  implements V1_RawValueSpecificationVisitor<RawValueSpecification> {
+  implements V1_RawValueSpecificationVisitor<RawValueSpecification>
+{
   context: V1_GraphBuilderContext;
   propertyGraphFetchTreeClass?: Class;
 
@@ -129,7 +130,7 @@ export class V1_ProtocolToMetaModelRawValueSpecificationVisitor
             _classReference.value,
             valueSpecification.subType,
             this.context.section,
-            _classReference.isResolvedFromAutoImports,
+            _classReference.isInferred,
           ),
         );
         _class = _classReference.value;

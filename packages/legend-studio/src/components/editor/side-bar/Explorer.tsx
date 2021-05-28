@@ -86,19 +86,20 @@ const ExplorerContextMenu = observer(
     const { node } = props;
     const editorStore = useEditorStore();
     const applicationStore = useApplicationStore();
-    const extraExplorerContextMenuItems = editorStore.applicationStore.pluginManager
-      .getEditorPlugins()
-      .flatMap(
-        (plugin) =>
-          plugin.getExtraExplorerContextMenuItemRendererConfigurations?.() ??
-          [],
-      )
-      .filter(isNonNullable)
-      .map((config) => (
-        <Fragment key={config.key}>
-          {config.renderer(editorStore, node?.packageableElement)}
-        </Fragment>
-      ));
+    const extraExplorerContextMenuItems =
+      editorStore.applicationStore.pluginManager
+        .getEditorPlugins()
+        .flatMap(
+          (plugin) =>
+            plugin.getExtraExplorerContextMenuItemRendererConfigurations?.() ??
+            [],
+        )
+        .filter(isNonNullable)
+        .map((config) => (
+          <Fragment key={config.key}>
+            {config.renderer(editorStore, node?.packageableElement)}
+          </Fragment>
+        ));
     const projectId = editorStore.sdlcState.currentProjectId;
     const _package = node
       ? node.packageableElement instanceof Package
@@ -125,8 +126,31 @@ const ExplorerContextMenu = observer(
         );
       }
     };
-    const createNewElement = (type: string): (() => void) => (): void =>
-      editorStore.newElementState.openModal(type, _package);
+    const getElementLinkInViewerMode = (): void => {
+      if (node) {
+        applicationStore
+          .copyTextToClipboard(
+            `${
+              window.location.origin
+            }${applicationStore.historyApiClient.createHref({
+              pathname: generateViewEntityRoute(
+                applicationStore.config.sdlcServerKey,
+                projectId,
+                node.packageableElement.path,
+              ),
+            })}`,
+          )
+          .then(() =>
+            applicationStore.notifySuccess('Copied element link to clipboard'),
+          )
+          .catch(applicationStore.alertIllegalUnhandledError);
+      }
+    };
+
+    const createNewElement =
+      (type: string): (() => void) =>
+      (): void =>
+        editorStore.newElementState.openModal(type, _package);
 
     const elementTypes = ([PACKAGEABLE_ELEMENT_TYPE.PACKAGE] as string[])
       .concat(editorStore.getSupportedElementTypes())
@@ -172,7 +196,12 @@ const ExplorerContextMenu = observer(
         )}
         {node && (
           <MenuContentItem onClick={openElementInViewerMode}>
-            Open Viewer
+            View in Project
+          </MenuContentItem>
+        )}
+        {node && (
+          <MenuContentItem onClick={getElementLinkInViewerMode}>
+            Copy Link
           </MenuContentItem>
         )}
       </MenuContent>
@@ -226,13 +255,13 @@ const PackageTreeNodeContainer = observer(
   (props: PackageTreeNodeContainerProps) => {
     const { node, level, stepPaddingInRem, onNodeSelect, innerProps } = props;
     const editorStore = useEditorStore();
-    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] = useState(
-      false,
-    );
+    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] =
+      useState(false);
     const { disableContextMenu } = innerProps;
     const [, dragRef] = useDrag(
       () => ({
-        item: new ElementDragSource(node.dndType, node),
+        type: node.dndType,
+        item: new ElementDragSource(node),
       }),
       [node],
     );
@@ -320,8 +349,10 @@ const ExplorerDropdownMenu = observer(
   (props: {}, ref: React.Ref<HTMLDivElement>) => {
     const editorStore = useEditorStore();
     const _package = editorStore.explorerTreeState.getSelectedNodePackage();
-    const createNewElement = (type: string): (() => void) => (): void =>
-      editorStore.newElementState.openModal(type, _package);
+    const createNewElement =
+      (type: string): (() => void) =>
+      (): void =>
+        editorStore.newElementState.openModal(type, _package);
 
     const elementTypes = ([PACKAGEABLE_ELEMENT_TYPE.PACKAGE] as string[])
       .concat(editorStore.getSupportedElementTypes())
@@ -387,7 +418,8 @@ const ExplorerTrees = observer(() => {
     getTreeChildNodes(editorStore, node, generationTreeData);
 
   // Generated Files Tree
-  const generationFileTreeData = editorStore.explorerTreeState.getFileGenerationTreeData();
+  const generationFileTreeData =
+    editorStore.explorerTreeState.getFileGenerationTreeData();
   const onGenerationFileTreeNodeSelect = (node: GenerationTreeNodeData): void =>
     editorStore.graphState.graphGenerationState.onTreeNodeSelect(
       node,

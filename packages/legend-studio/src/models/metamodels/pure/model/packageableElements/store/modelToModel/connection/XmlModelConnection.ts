@@ -26,7 +26,8 @@ import type { PackageableElementReference } from '../../../../../model/packageab
 
 export class XmlModelConnection
   extends PureModelConnection
-  implements Hashable {
+  implements Hashable
+{
   public static readonly CONTENT_TYPE = ContentType.APPLICATION_XML;
 
   class: PackageableElementReference<Class>;
@@ -60,7 +61,6 @@ export class XmlModelConnection
   get hashCode(): string {
     return hashArray([
       CORE_HASH_STRUCTURE.XML_MODEL_CONNECTION,
-      super.hashCode,
       this.class.valueForSerialization,
       this.url,
     ]);

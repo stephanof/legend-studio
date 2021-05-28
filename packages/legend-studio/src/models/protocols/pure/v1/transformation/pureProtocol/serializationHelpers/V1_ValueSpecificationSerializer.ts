@@ -207,13 +207,13 @@ const V1_appliedFunctionModelSchema = createModelSchema(V1_AppliedFunction, {
 const appliedPropertyModelSchema = createModelSchema(V1_AppliedProperty, {
   _type: usingConstantValueSchema(V1_ValueSpecificationType.APPLIED_PROPERTY),
   class: optional(primitive()),
-  property: primitive(),
   parameters: list(
     custom(
       (val) => V1_serializeValueSpecification(val),
       (val) => V1_deserializeValueSpecification(val),
     ),
   ),
+  property: primitive(),
 });
 
 const collectionModelSchema = createModelSchema(V1_Collection, {
@@ -482,7 +482,8 @@ const tdsOlapAggregationModelSchema = createModelSchema(V1_TdsOlapAggregation, {
 });
 
 class V1_ValueSpecificationSerializer
-  implements V1_ValueSpecificationVisitor<PlainObject<V1_ValueSpecification>> {
+  implements V1_ValueSpecificationVisitor<PlainObject<V1_ValueSpecification>>
+{
   visit_Class(
     valueSpecification: V1_Class,
   ): PlainObject<V1_ValueSpecification> {

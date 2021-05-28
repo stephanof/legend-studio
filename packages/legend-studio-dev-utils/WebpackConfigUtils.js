@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-const sass = require('sass');
-const path = require('path');
-const fs = require('fs');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const ForkTsCheckerWebpackPlugin = require('./ForkTsCheckerWebpackPlugin');
-const ForkTsCheckerWebpackFormatterPlugin = require('./ForkTsCheckerWebpackFormatterPlugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const { resolveFullTsConfig } = require('./TypescriptConfigUtils');
-const CircularDependencyPlugin = require('circular-dependency-plugin');
-const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+import sass from 'sass';
+import { resolve, join } from 'path';
+import { existsSync } from 'fs';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+import CircularDependencyPlugin from 'circular-dependency-plugin';
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import { resolveFullTsConfig } from './TypescriptConfigUtils.js';
+import ForkTsCheckerWebpackPlugin from './ForkTsCheckerWebpackPlugin.js';
+import ForkTsCheckerWebpackFormatterPlugin from './ForkTsCheckerWebpackFormatterPlugin.js';
+import { createRequire } from 'module';
 
-const getEnvInfo = (env, arg) => ({
+const require = createRequire(import.meta.url);
+
+export const getEnvInfo = (env, arg) => ({
   isEnvDevelopment: arg.mode === 'development',
   isEnvProduction: arg.mode === 'production',
   isEnvDevelopment_Advanced: process.env.DEVELOPMENT_MODE === 'advanced',
@@ -46,11 +49,8 @@ const getBaseWebpackConfig = (
   if (!dirname) {
     throw new Error(`\`dirname\` is required to build Webpack config`);
   }
-  const {
-    isEnvDevelopment,
-    isEnvProduction,
-    isEnvDevelopment_Advanced,
-  } = getEnvInfo(env, arg);
+  const { isEnvDevelopment, isEnvProduction, isEnvDevelopment_Advanced } =
+    getEnvInfo(env, arg);
 
   const config = {
     mode: arg.mode,
@@ -98,6 +98,13 @@ const getBaseWebpackConfig = (
       rules: [
         {
           test: /\.(?:mjs|js|ts|tsx)$/,
+          resolve: {
+            // Since we use ES modules, the import path must be fully specified. But this is not something Typescript
+            // support, so the workaround is to not require extension in import path.
+            // See https://github.com/webpack/webpack/issues/11467
+            // See https://github.com/microsoft/TypeScript/issues/16577
+            fullySpecified: false,
+          },
           // NOTE: we don't need to specify the `exclude` part for this
           // loader as we already specify the include list instead.
           //
@@ -106,7 +113,7 @@ const getBaseWebpackConfig = (
           // we need to do so here.
           include: [
             // The source code of the current workspace
-            path.resolve(dirname, './src/'),
+            resolve(dirname, './src/'),
             // Packages from the same monorepo
             /legend-studio/,
             // Packages coming from NPM published under '@finos' scope
@@ -236,7 +243,7 @@ const getBaseWebpackConfig = (
               parserOptions: {
                 // Limit the option like this helps with memory usage
                 // See https://github.com/typescript-eslint/typescript-eslint/issues/1192
-                project: path.resolve(dirname, './tsconfig.json'),
+                project: resolve(dirname, './tsconfig.json'),
               },
             },
           },
@@ -263,9 +270,9 @@ const validateAppConfig = (config, dirname) => {
   }
   // faviconPath
   const faviconPath = config.faviconPath;
-  if (faviconPath && !fs.existsSync(path.resolve(dirname, faviconPath))) {
+  if (faviconPath && !existsSync(resolve(dirname, faviconPath))) {
     throw new Error(
-      `Invalid config: Cannot find favicon file with provided path (\`faviconPath\`) '${path}'.\n
+      `Invalid config: Cannot find favicon file with provided path (\`faviconPath\`) '${faviconPath}'.\n
       Make sure the path is relative to the root directory of the module.`,
     );
   }
@@ -281,7 +288,7 @@ const validateAppConfig = (config, dirname) => {
   }
 };
 
-const getWebAppBaseWebpackConfig = (
+export const getWebAppBaseWebpackConfig = (
   env,
   arg,
   dirname,
@@ -320,7 +327,7 @@ const getWebAppBaseWebpackConfig = (
     entry: { index: mainEntryPath },
     output: {
       ...baseConfig.output,
-      path: path.join(dirname, `dist${appConfig.baseUrl}`),
+      path: join(dirname, `dist${appConfig.baseUrl}`),
       assetModuleFilename: `${staticPath}/${
         isEnvDevelopment ? '[name].[ext]' : '[name].[contenthash:8].[ext]'
       }`,
@@ -343,22 +350,16 @@ const getWebAppBaseWebpackConfig = (
     },
     devServer: {
       compress: true, // enable gzip compression for everything served to reduce traffic size
-      dev: {
+      devMiddleware: {
         publicPath: '/',
       },
-      open: true,
-      // start - should remove this in next iteration of webpack-dev-server@4.beta
-      static: {
-        watch: false,
-      },
-      // end - should remove this in next iteration of webpack-dev-server@4.beta
-      port: 8080,
-      host: 'localhost',
-      openPage:
+      open:
         // trim the leading and trailing slash
         appConfig.baseUrl.length === 1
-          ? undefined
-          : appConfig.baseUrl.slice(1, -1),
+          ? false
+          : [appConfig.baseUrl.slice(1, -1)],
+      port: 8080,
+      host: 'localhost',
       // redirect 404s to /index.html
       historyApiFallback: {
         // URL contains dot such as for version (majorV.minV.patchV: 1.0.0) need this rule
@@ -402,7 +403,7 @@ const getWebAppBaseWebpackConfig = (
       new HtmlWebpackPlugin({
         template: indexHtmlPath,
         favicon: appConfig.faviconPath
-          ? path.resolve(dirname, appConfig.faviconPath)
+          ? resolve(dirname, appConfig.faviconPath)
           : undefined,
       }),
       /**
@@ -412,7 +413,7 @@ const getWebAppBaseWebpackConfig = (
       new MonacoWebpackPlugin({
         // Only include what we need to lessen the bundle loads
         // See https://github.com/microsoft/monaco-editor-webpack-plugin
-        languages: ['json', 'java', 'markdown'],
+        languages: ['json', 'java', 'markdown', 'sql'],
         // Here we can choose to also exclude/include features but this really does not
         // significantly affect the bundle size anyhow, but it's also strange that we
         // need to turn off features in `monaco-editor` on creation anyway
@@ -435,7 +436,7 @@ const getWebAppBaseWebpackConfig = (
   return config;
 };
 
-const buildAliasEntriesFromTsConfigPathMapping = ({
+export const buildAliasEntriesFromTsConfigPathMapping = ({
   dirname,
   tsConfigPath,
   excludePaths = [],
@@ -446,7 +447,7 @@ const buildAliasEntriesFromTsConfigPathMapping = ({
   const tsConfig = resolveFullTsConfig(tsConfigPath);
   const paths = tsConfig?.compilerOptions?.paths;
   const baseUrl = tsConfig?.compilerOptions?.baseUrl;
-  const basePath = baseUrl ? path.resolve(dirname, baseUrl) : dirname;
+  const basePath = baseUrl ? resolve(dirname, baseUrl) : dirname;
   if (paths) {
     const aliases = {};
     Object.entries(paths).forEach(([key, value]) => {
@@ -463,15 +464,9 @@ const buildAliasEntriesFromTsConfigPathMapping = ({
         // webpack does not need do exact replacement so wildcard '*' is not needed
         val.replace('*', ''),
       );
-      aliases[alias] = replacement.map((val) => path.resolve(basePath, val));
+      aliases[alias] = replacement.map((val) => resolve(basePath, val));
     });
     return aliases;
   }
   return {};
-};
-
-module.exports = {
-  getEnvInfo,
-  getWebAppBaseWebpackConfig,
-  buildAliasEntriesFromTsConfigPathMapping,
 };

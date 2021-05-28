@@ -32,12 +32,14 @@ import type { RelationalDatabaseConnection } from '../../../../../../metamodels/
 import type { AuthenticationStrategy } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/connection/AuthenticationStrategy';
 import {
   DefaultH2AuthenticationStrategy,
+  SnowflakePublicAuthenticationStrategy,
   DelegatedKerberosAuthenticationStrategy,
   TestDatabaseAuthenticationStrategy,
   OAuthAuthenticationStrategy,
 } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/connection/AuthenticationStrategy';
 import type { DatasourceSpecification } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/connection/DatasourceSpecification';
 import {
+  LocalH2DatasourceSpecification,
   StaticDatasourceSpecification,
   EmbeddedH2DatasourceSpecification,
   SnowflakeDatasourceSpecification,
@@ -50,6 +52,7 @@ import {
 import { V1_PackageableConnection } from '../../../model/packageableElements/connection/V1_PackageableConnection';
 import type { V1_DatasourceSpecification } from '../../../model/packageableElements/store/relational/connection/V1_DatasourceSpecification';
 import {
+  V1_LocalH2DataSourceSpecification,
   V1_EmbeddedH2DatasourceSpecification,
   V1_SnowflakeDatasourceSpecification,
   V1_StaticDatasourceSpecification,
@@ -57,6 +60,7 @@ import {
 import type { V1_AuthenticationStrategy } from '../../../model/packageableElements/store/relational/connection/V1_AuthenticationStrategy';
 import {
   V1_DefaultH2AuthenticationStrategy,
+  V1_SnowflakePublicAuthenticationStrategy,
   V1_DelegatedKerberosAuthenticationStrategy,
   V1_TestDatabaseAuthenticationStrategy,
   V1_OAuthAuthenticationStrategy,
@@ -114,11 +118,17 @@ const transformDatasourceSpecification = (
     return transformEmbeddedH2DatasourceSpecification(metamodel);
   } else if (metamodel instanceof SnowflakeDatasourceSpecification) {
     return transformSnowflakeDatasourceSpecification(metamodel);
+  } else if (metamodel instanceof LocalH2DatasourceSpecification) {
+    const protocol = new V1_LocalH2DataSourceSpecification();
+    protocol.testDataSetupCsv = metamodel.testDataSetupCsv;
+    protocol.testDataSetupSqls = metamodel.testDataSetupSqls;
+    return protocol;
   }
   const extraConnectionDatasourceSpecificationTransformers = plugins.flatMap(
     (plugin) =>
-      (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionDatasourceSpecificationTransformers?.() ??
-      [],
+      (
+        plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+      ).V1_getExtraConnectionDatasourceSpecificationTransformers?.() ?? [],
   );
   for (const transformer of extraConnectionDatasourceSpecificationTransformers) {
     const protocol = transformer(metamodel);
@@ -147,22 +157,27 @@ const transformAuthenticationStrategy = (
   plugins: PureProtocolProcessorPlugin[],
 ): V1_AuthenticationStrategy => {
   if (metamodel instanceof DefaultH2AuthenticationStrategy) {
-    const authentication = new V1_DefaultH2AuthenticationStrategy();
-    return authentication;
+    return new V1_DefaultH2AuthenticationStrategy();
   } else if (metamodel instanceof DelegatedKerberosAuthenticationStrategy) {
     const auth = new V1_DelegatedKerberosAuthenticationStrategy();
     auth.serverPrincipal = metamodel.serverPrincipal;
     return auth;
   } else if (metamodel instanceof TestDatabaseAuthenticationStrategy) {
-    const auth = new V1_TestDatabaseAuthenticationStrategy();
-    return auth;
+    return new V1_TestDatabaseAuthenticationStrategy();
   } else if (metamodel instanceof OAuthAuthenticationStrategy) {
     return transformOAuthtAuthenticationStrategy(metamodel);
+  } else if (metamodel instanceof SnowflakePublicAuthenticationStrategy) {
+    const auth = new V1_SnowflakePublicAuthenticationStrategy();
+    auth.privateKeyVaultReference = metamodel.privateKeyVaultReference;
+    auth.passPhraseVaultReference = metamodel.passPhraseVaultReference;
+    auth.publicUserName = metamodel.publicUserName;
+    return auth;
   }
   const extraConnectionAuthenticationStrategyTransformers = plugins.flatMap(
     (plugin) =>
-      (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionAuthenticationStrategyTransformers?.() ??
-      [],
+      (
+        plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+      ).V1_getExtraConnectionAuthenticationStrategyTransformers?.() ?? [],
   );
   for (const transformer of extraConnectionAuthenticationStrategyTransformers) {
     const protocol = transformer(metamodel);
@@ -191,8 +206,9 @@ const transformRelationalDatabaseConnection = (
     metamodel.datasourceSpecification,
     plugins,
   );
-  connection.type = (metamodel.type as unknown) as V1_DatabaseType;
+  connection.type = metamodel.type as unknown as V1_DatabaseType;
   connection.timeZone = metamodel.timeZone;
+  connection.quoteIdentifiers = metamodel.quoteIdentifiers;
   if (metamodel.postProcessors.length) {
     connection.postProcessors = metamodel.postProcessors.map((postprocessor) =>
       V1_transformPostProcessor(postprocessor, plugins),
@@ -215,7 +231,7 @@ const transformModelChainConnection = (
   element: ModelChainConnection,
 ): V1_ModelChainConnection => {
   const connection = new V1_ModelChainConnection();
-  connection.store = V1_transformElementReference(element.store);
+  connection.store = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   connection.mappings = element.mappings.map(V1_transformElementReference);
   return connection;
 };
@@ -225,7 +241,7 @@ const transformJsonModelConnection = (
 ): V1_JsonModelConnection => {
   const connection = new V1_JsonModelConnection();
   connection.class = V1_transformElementReference(element.class);
-  connection.store = V1_transformElementReference(element.store);
+  connection.store = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   connection.url = element.url;
   return connection;
 };
@@ -235,7 +251,7 @@ const transformXmlModelConnection = (
 ): V1_XmlModelConnection => {
   const connection = new V1_XmlModelConnection();
   connection.class = V1_transformElementReference(element.class);
-  connection.store = V1_transformElementReference(element.store);
+  connection.store = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   connection.url = element.url;
   return connection;
 };

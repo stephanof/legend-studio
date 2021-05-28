@@ -25,6 +25,7 @@ export const testDatabaseRoundtrip = [
       filters: [
         {
           _type: 'filter',
+          name: 'PositiveInteractionTimeFilter',
           operation: {
             _type: 'dynaFunc',
             funcName: 'greaterThan',
@@ -35,6 +36,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'interactionTable',
                 },
@@ -46,10 +48,10 @@ export const testDatabaseRoundtrip = [
               },
             ],
           },
-          name: 'PositiveInteractionTimeFilter',
         },
         {
           _type: 'filter',
+          name: 'ProductSynonymFilter',
           operation: {
             _type: 'dynaFunc',
             funcName: 'notEqual',
@@ -60,6 +62,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'productSchema',
                   table: 'synonymTable',
                 },
@@ -71,10 +74,10 @@ export const testDatabaseRoundtrip = [
               },
             ],
           },
-          name: 'ProductSynonymFilter',
         },
         {
           _type: 'filter',
+          name: 'NonNegativePnlFilter',
           operation: {
             _type: 'dynaFunc',
             funcName: 'greaterThan',
@@ -85,6 +88,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlTable',
                 },
@@ -96,10 +100,10 @@ export const testDatabaseRoundtrip = [
               },
             ],
           },
-          name: 'NonNegativePnlFilter',
         },
         {
           _type: 'filter',
+          name: 'LessThanEqualZeroPnlFilter',
           operation: {
             _type: 'dynaFunc',
             funcName: 'lessThanEqual',
@@ -110,6 +114,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlTable',
                 },
@@ -121,7 +126,6 @@ export const testDatabaseRoundtrip = [
               },
             ],
           },
-          name: 'LessThanEqualZeroPnlFilter',
         },
       ],
       includedStores: ['model::relational::tests::dbInc'],
@@ -138,6 +142,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'productSchema',
                   table: 'synonymTable',
                 },
@@ -149,6 +154,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'productSchema',
                   table: 'productTable',
                 },
@@ -169,6 +175,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeTable',
                 },
@@ -180,6 +187,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'productSchema',
                   table: 'productTable',
                 },
@@ -200,6 +208,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeTable',
                 },
@@ -211,6 +220,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'accountTable',
                 },
@@ -231,6 +241,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'interactionTable',
                 },
@@ -242,6 +253,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -262,6 +274,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'interactionTable',
                 },
@@ -273,6 +286,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -297,6 +311,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -308,6 +323,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionViewMaxTime',
                     },
@@ -325,6 +341,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -336,6 +353,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionViewMaxTime',
                     },
@@ -358,6 +376,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeTable',
                 },
@@ -369,6 +388,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeEventTable',
                 },
@@ -389,6 +409,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeTable',
                 },
@@ -400,6 +421,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeEventViewMaxTradeEventDate',
                 },
@@ -420,6 +442,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'tradeEventTable',
                 },
@@ -431,6 +454,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -455,6 +479,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -466,6 +491,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: '{target}',
                     },
@@ -483,6 +509,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -494,6 +521,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: '{target}',
                     },
@@ -516,6 +544,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -527,6 +556,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'salesPersonTable',
                 },
@@ -547,6 +577,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -558,6 +589,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'accountTable',
                 },
@@ -578,6 +610,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlView',
                 },
@@ -589,6 +622,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -609,6 +643,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlViewOnView',
                 },
@@ -620,6 +655,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -640,6 +676,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderNegativePnlView',
                 },
@@ -651,6 +688,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -671,6 +709,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderNegativePnlViewOnView',
                 },
@@ -682,6 +721,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -702,6 +742,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlView',
                 },
@@ -713,6 +754,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -733,6 +775,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'salesPersonTable',
                 },
@@ -744,6 +787,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'PersonFirmView',
                 },
@@ -764,6 +808,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderPnlTable',
                 },
@@ -775,6 +820,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'orderTable',
                 },
@@ -795,6 +841,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'accountOrderPnlView',
                 },
@@ -806,6 +853,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'accountTable',
                 },
@@ -826,6 +874,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -837,6 +886,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::db',
+                  mainTableDb: 'model::relational::tests::db',
                   schema: 'default',
                   table: 'otherNamesTable',
                 },
@@ -1249,6 +1299,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -1263,6 +1314,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'interactionTable',
                     },
@@ -1281,6 +1333,7 @@ export const testDatabaseRoundtrip = [
                         table: {
                           _type: 'Table',
                           database: 'model::relational::tests::db',
+                          mainTableDb: 'model::relational::tests::db',
                           schema: 'default',
                           table: 'interactionTable',
                         },
@@ -1298,6 +1351,7 @@ export const testDatabaseRoundtrip = [
                   table: {
                     _type: 'Table',
                     database: 'model::relational::tests::db',
+                    mainTableDb: 'model::relational::tests::db',
                     schema: 'default',
                     table: 'interactionTable',
                   },
@@ -1309,6 +1363,7 @@ export const testDatabaseRoundtrip = [
                   table: {
                     _type: 'Table',
                     database: 'model::relational::tests::db',
+                    mainTableDb: 'model::relational::tests::db',
                     schema: 'default',
                     table: 'interactionTable',
                   },
@@ -1328,6 +1383,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'tradeEventTable',
                     },
@@ -1346,6 +1402,7 @@ export const testDatabaseRoundtrip = [
                         table: {
                           _type: 'Table',
                           database: 'model::relational::tests::db',
+                          mainTableDb: 'model::relational::tests::db',
                           schema: 'default',
                           table: 'tradeEventTable',
                         },
@@ -1363,6 +1420,7 @@ export const testDatabaseRoundtrip = [
                   table: {
                     _type: 'Table',
                     database: 'model::relational::tests::db',
+                    mainTableDb: 'model::relational::tests::db',
                     schema: 'default',
                     table: 'tradeEventTable',
                   },
@@ -1382,6 +1440,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlTable',
                     },
@@ -1396,6 +1455,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlTable',
                     },
@@ -1422,6 +1482,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'accountTable',
                       },
@@ -1449,6 +1510,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'salesPersonTable',
                       },
@@ -1476,6 +1538,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'salesPersonTable',
                       },
@@ -1499,6 +1562,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlView',
                     },
@@ -1513,6 +1577,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlView',
                     },
@@ -1535,6 +1600,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlTable',
                     },
@@ -1549,6 +1615,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderPnlTable',
                     },
@@ -1575,6 +1642,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'accountTable',
                       },
@@ -1602,6 +1670,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'salesPersonTable',
                       },
@@ -1629,6 +1698,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::db',
+                        mainTableDb: 'model::relational::tests::db',
                         schema: 'default',
                         table: 'salesPersonTable',
                       },
@@ -1652,6 +1722,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderNegativePnlView',
                     },
@@ -1666,6 +1737,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderNegativePnlView',
                     },
@@ -1688,6 +1760,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::db',
+                      mainTableDb: 'model::relational::tests::db',
                       schema: 'default',
                       table: 'orderTable',
                     },
@@ -1714,6 +1787,7 @@ export const testDatabaseRoundtrip = [
                           table: {
                             _type: 'Table',
                             database: 'model::relational::tests::db',
+                            mainTableDb: 'model::relational::tests::db',
                             schema: 'default',
                             table: 'orderPnlTable',
                           },
@@ -1732,6 +1806,7 @@ export const testDatabaseRoundtrip = [
                   table: {
                     _type: 'Table',
                     database: 'model::relational::tests::db',
+                    mainTableDb: 'model::relational::tests::db',
                     schema: 'default',
                     table: 'orderTable',
                   },
@@ -1748,12 +1823,95 @@ export const testDatabaseRoundtrip = [
     classifierPath: 'meta::relational::metamodel::Database',
   },
   {
+    path: 'model::relational::tests::db2',
+    content: {
+      _type: 'relational',
+      filters: [],
+      includedStores: ['model::relational::tests::db'],
+      joins: [],
+      name: 'db2',
+      package: 'model::relational::tests',
+      schemas: [
+        {
+          name: 'default',
+          tables: [],
+          views: [
+            {
+              columnMappings: [
+                {
+                  name: 'PERSON_ID',
+                  operation: {
+                    _type: 'column',
+                    column: 'ID',
+                    table: {
+                      _type: 'Table',
+                      database: 'model::relational::tests::db2',
+                      mainTableDb: 'model::relational::tests::db2',
+                      schema: 'default',
+                      table: 'personTable',
+                    },
+                    tableAlias: 'personTable',
+                  },
+                },
+                {
+                  name: 'lastName',
+                  operation: {
+                    _type: 'column',
+                    column: 'LASTNAME',
+                    table: {
+                      _type: 'Table',
+                      database: 'model::relational::tests::db2',
+                      mainTableDb: 'model::relational::tests::db2',
+                      schema: 'default',
+                      table: 'personTable',
+                    },
+                    tableAlias: 'personTable',
+                  },
+                },
+                {
+                  name: 'firm_name',
+                  operation: {
+                    _type: 'elemtWithJoins',
+                    joins: [
+                      {
+                        db: 'model::relational::tests::db2',
+                        name: 'Firm_Person',
+                      },
+                    ],
+                    relationalElement: {
+                      _type: 'column',
+                      column: 'LEGALNAME',
+                      table: {
+                        _type: 'Table',
+                        database: 'model::relational::tests::db2',
+                        mainTableDb: 'model::relational::tests::db2',
+                        schema: 'default',
+                        table: 'firmTable',
+                      },
+                      tableAlias: 'firmTable',
+                    },
+                  },
+                },
+              ],
+              distinct: false,
+              groupBy: [],
+              name: 'ViewWithJoinInIncludedStore',
+              primaryKey: ['PERSON_ID'],
+            },
+          ],
+        },
+      ],
+    },
+    classifierPath: 'meta::relational::metamodel::Database',
+  },
+  {
     path: 'model::relational::tests::dbInc',
     content: {
       _type: 'relational',
       filters: [
         {
           _type: 'filter',
+          name: 'FirmXFilter',
           operation: {
             _type: 'dynaFunc',
             funcName: 'equal',
@@ -1764,6 +1922,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -1775,7 +1934,6 @@ export const testDatabaseRoundtrip = [
               },
             ],
           },
-          name: 'FirmXFilter',
         },
       ],
       includedStores: [],
@@ -1792,6 +1950,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -1803,6 +1962,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'PersonViewWithDistinct',
                 },
@@ -1827,6 +1987,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -1838,6 +1999,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personViewWithGroupBy',
                     },
@@ -1855,6 +2017,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -1866,6 +2029,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personViewWithGroupBy',
                     },
@@ -1888,6 +2052,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
@@ -1899,6 +2064,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -1919,6 +2085,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
@@ -1930,6 +2097,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -1950,6 +2118,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -1961,6 +2130,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -1981,6 +2151,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -1992,6 +2163,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -2012,6 +2184,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmExtensionTable',
                 },
@@ -2023,6 +2196,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'PersonTableExtension',
                 },
@@ -2043,6 +2217,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -2054,6 +2229,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
@@ -2074,6 +2250,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -2085,6 +2262,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: '{target}',
                 },
@@ -2105,6 +2283,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
@@ -2116,6 +2295,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'placeOfInterestTable',
                 },
@@ -2136,6 +2316,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -2147,6 +2328,7 @@ export const testDatabaseRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'model::relational::tests::dbInc',
+                  mainTableDb: 'model::relational::tests::dbInc',
                   schema: 'default',
                   table: 'otherFirmTable',
                 },
@@ -2577,6 +2759,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -2591,6 +2774,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -2613,6 +2797,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::dbInc',
+                        mainTableDb: 'model::relational::tests::dbInc',
                         schema: 'default',
                         table: 'firmTable',
                       },
@@ -2636,6 +2821,7 @@ export const testDatabaseRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'model::relational::tests::dbInc',
+                      mainTableDb: 'model::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -2654,6 +2840,7 @@ export const testDatabaseRoundtrip = [
                         table: {
                           _type: 'Table',
                           database: 'model::relational::tests::dbInc',
+                          mainTableDb: 'model::relational::tests::dbInc',
                           schema: 'default',
                           table: 'personTable',
                         },
@@ -2671,6 +2858,7 @@ export const testDatabaseRoundtrip = [
                   table: {
                     _type: 'Table',
                     database: 'model::relational::tests::dbInc',
+                    mainTableDb: 'model::relational::tests::dbInc',
                     schema: 'default',
                     table: 'personTable',
                   },
@@ -2698,6 +2886,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::dbInc',
+                        mainTableDb: 'model::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -2721,6 +2910,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::dbInc',
+                        mainTableDb: 'model::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -2744,6 +2934,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::dbInc',
+                        mainTableDb: 'model::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -2767,6 +2958,7 @@ export const testDatabaseRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'model::relational::tests::dbInc',
+                        mainTableDb: 'model::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -2807,6 +2999,7 @@ export const testDatabaseWithSelfJoin = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -2818,6 +3011,7 @@ export const testDatabaseWithSelfJoin = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: '{target}',
                 },
@@ -2879,6 +3073,7 @@ export const testDatabaseWithSelfJoin = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc1',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc1',
                   schema: 'demoSchema',
                   table: 'personTable',
                 },
@@ -2890,6 +3085,7 @@ export const testDatabaseWithSelfJoin = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc1',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc1',
                   schema: 'default',
                   table: '{target}',
                 },
@@ -2976,7 +3172,7 @@ export const simpleEmbeddedRelationalRoundtrip = [
             upperBound: 1,
           },
           name: 'employees',
-          type: 'Person',
+          type: 'other::Person',
         },
         {
           multiplicity: {
@@ -2984,7 +3180,7 @@ export const simpleEmbeddedRelationalRoundtrip = [
             upperBound: 1,
           },
           name: 'address',
-          type: 'Address',
+          type: 'other::Address',
         },
       ],
     },
@@ -3011,7 +3207,7 @@ export const simpleEmbeddedRelationalRoundtrip = [
             upperBound: 1,
           },
           name: 'firm',
-          type: 'Firm',
+          type: 'other::Firm',
         },
         {
           multiplicity: {
@@ -3019,7 +3215,7 @@ export const simpleEmbeddedRelationalRoundtrip = [
             upperBound: 1,
           },
           name: 'address',
-          type: 'Address',
+          type: 'other::Address',
         },
       ],
     },
@@ -3029,8 +3225,70 @@ export const simpleEmbeddedRelationalRoundtrip = [
     path: 'mapping::db',
     content: {
       _type: 'relational',
-      filters: [],
-      joins: [],
+      filters: [
+        {
+          _type: 'filter',
+          name: 'PersonFilter',
+          operation: {
+            _type: 'dynaFunc',
+            funcName: 'equal',
+            parameters: [
+              {
+                _type: 'column',
+                column: 'name',
+                table: {
+                  _type: 'Table',
+                  database: 'mapping::db',
+                  mainTableDb: 'mapping::db',
+                  schema: 'default',
+                  table: 'employeeFirmDenormTable',
+                },
+                tableAlias: 'employeeFirmDenormTable',
+              },
+              {
+                _type: 'literal',
+                value: 'Utkarsh',
+              },
+            ],
+          },
+        },
+      ],
+      includedStores: [],
+      joins: [
+        {
+          name: 'testJoin',
+          operation: {
+            _type: 'dynaFunc',
+            funcName: 'equal',
+            parameters: [
+              {
+                _type: 'column',
+                column: 'name',
+                table: {
+                  _type: 'Table',
+                  database: 'mapping::db',
+                  mainTableDb: 'mapping::db',
+                  schema: 'default',
+                  table: 'employeeFirmDenormTable',
+                },
+                tableAlias: 'employeeFirmDenormTable',
+              },
+              {
+                _type: 'column',
+                column: 'name',
+                table: {
+                  _type: 'Table',
+                  database: 'mapping::db',
+                  mainTableDb: 'mapping::db',
+                  schema: 'default',
+                  table: '{target}',
+                },
+                tableAlias: '{target}',
+              },
+            ],
+          },
+        },
+      ],
       name: 'db',
       package: 'mapping',
       schemas: [
@@ -3085,7 +3343,6 @@ export const simpleEmbeddedRelationalRoundtrip = [
           views: [],
         },
       ],
-      includedStores: [],
     },
     classifierPath: 'meta::relational::metamodel::Database',
   },
@@ -3093,15 +3350,27 @@ export const simpleEmbeddedRelationalRoundtrip = [
     path: 'mappingPackage::myMapping',
     content: {
       _type: 'mapping',
-      includedMappings: [],
       classMappings: [
         {
           _type: 'relational',
           class: 'other::Person',
           distinct: false,
+          filter: {
+            filter: {
+              db: 'mapping::db',
+              name: 'PersonFilter',
+            },
+            joins: [
+              {
+                db: 'mapping::db',
+                name: 'testJoin',
+              },
+            ],
+          },
           mainTable: {
             _type: 'Table',
             database: 'mapping::db',
+            mainTableDb: 'mapping::db',
             schema: 'default',
             table: 'employeeFirmDenormTable',
           },
@@ -3112,6 +3381,7 @@ export const simpleEmbeddedRelationalRoundtrip = [
               table: {
                 _type: 'Table',
                 database: 'mapping::db',
+                mainTableDb: 'mapping::db',
                 schema: 'default',
                 table: 'employeeFirmDenormTable',
               },
@@ -3131,29 +3401,22 @@ export const simpleEmbeddedRelationalRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'mapping::db',
+                  mainTableDb: 'mapping::db',
                   schema: 'default',
                   table: 'employeeFirmDenormTable',
                 },
                 tableAlias: 'employeeFirmDenormTable',
               },
-              source: 'other_Person',
             },
             {
               _type: 'embeddedPropertyMapping',
-              property: {
-                class: 'other::Person',
-                property: 'firm',
-              },
-              source: 'other_Person',
               classMapping: {
                 _type: 'embedded',
-                class: 'other::Firm',
                 primaryKey: [],
                 propertyMappings: [
                   {
                     _type: 'relationalPropertyMapping',
                     property: {
-                      class: 'other::Firm',
                       property: 'legalName',
                     },
                     relationalOperation: {
@@ -3162,15 +3425,19 @@ export const simpleEmbeddedRelationalRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'mapping::db',
+                        mainTableDb: 'mapping::db',
                         schema: 'default',
                         table: 'employeeFirmDenormTable',
                       },
                       tableAlias: 'employeeFirmDenormTable',
                     },
-                    source: 'other_Person',
                   },
                 ],
                 root: false,
+              },
+              property: {
+                class: 'other::Person',
+                property: 'firm',
               },
             },
           ],
@@ -3178,48 +3445,21 @@ export const simpleEmbeddedRelationalRoundtrip = [
         },
       ],
       enumerationMappings: [],
+      includedMappings: [],
       name: 'myMapping',
       package: 'mappingPackage',
       tests: [],
     },
     classifierPath: 'meta::pure::mapping::Mapping',
   },
-  {
-    path: '__internal__::SectionIndex',
-    content: {
-      _type: 'sectionIndex',
-      name: 'SectionIndex',
-      package: '__internal__',
-      sections: [
-        {
-          _type: 'importAware',
-          imports: ['other'],
-          elements: ['other::Person', 'other::Firm', 'other::Address'],
-          parserName: 'Pure',
-        },
-        {
-          _type: 'default',
-          elements: ['mapping::db'],
-          parserName: 'Relational',
-        },
-        {
-          _type: 'importAware',
-          imports: [],
-          elements: ['mappingPackage::myMapping'],
-          parserName: 'Mapping',
-        },
-      ],
-    },
-    classifierPath: 'meta::pure::metamodel::section::SectionIndex',
-  },
 ];
 
 export const multiLevelEmbeddedRelationalRoundtrip = [
   {
-    path: 'other::Person',
+    path: 'other::Address',
     content: {
       _type: 'class',
-      name: 'Person',
+      name: 'Address',
       package: 'other',
       properties: [
         {
@@ -3227,24 +3467,8 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
             lowerBound: 1,
             upperBound: 1,
           },
-          name: 'name',
+          name: 'line1',
           type: 'String',
-        },
-        {
-          multiplicity: {
-            lowerBound: 1,
-            upperBound: 1,
-          },
-          name: 'firm',
-          type: 'other::Firm',
-        },
-        {
-          multiplicity: {
-            lowerBound: 0,
-            upperBound: 1,
-          },
-          name: 'address',
-          type: 'other::Address',
         },
       ],
     },
@@ -3286,10 +3510,10 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
     classifierPath: 'meta::pure::metamodel::type::Class',
   },
   {
-    path: 'other::Address',
+    path: 'other::Person',
     content: {
       _type: 'class',
-      name: 'Address',
+      name: 'Person',
       package: 'other',
       properties: [
         {
@@ -3297,8 +3521,24 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
             lowerBound: 1,
             upperBound: 1,
           },
-          name: 'line1',
+          name: 'name',
           type: 'String',
+        },
+        {
+          multiplicity: {
+            lowerBound: 1,
+            upperBound: 1,
+          },
+          name: 'firm',
+          type: 'other::Firm',
+        },
+        {
+          multiplicity: {
+            lowerBound: 0,
+            upperBound: 1,
+          },
+          name: 'address',
+          type: 'other::Address',
         },
       ],
     },
@@ -3309,6 +3549,7 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
     content: {
       _type: 'relational',
       filters: [],
+      includedStores: [],
       joins: [],
       name: 'db',
       package: 'mapping',
@@ -3364,7 +3605,6 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
           views: [],
         },
       ],
-      includedStores: [],
     },
     classifierPath: 'meta::relational::metamodel::Database',
   },
@@ -3372,7 +3612,6 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
     path: 'mappingPackage::myMapping',
     content: {
       _type: 'mapping',
-      includedMappings: [],
       classMappings: [
         {
           _type: 'relational',
@@ -3381,6 +3620,7 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
           mainTable: {
             _type: 'Table',
             database: 'mapping::db',
+            mainTableDb: 'mapping::db',
             schema: 'default',
             table: 'employeeFirmDenormTable',
           },
@@ -3391,6 +3631,7 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
               table: {
                 _type: 'Table',
                 database: 'mapping::db',
+                mainTableDb: 'mapping::db',
                 schema: 'default',
                 table: 'employeeFirmDenormTable',
               },
@@ -3410,23 +3651,17 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                 table: {
                   _type: 'Table',
                   database: 'mapping::db',
+                  mainTableDb: 'mapping::db',
                   schema: 'default',
                   table: 'employeeFirmDenormTable',
                 },
                 tableAlias: 'employeeFirmDenormTable',
               },
-              source: 'other_Person',
             },
             {
               _type: 'embeddedPropertyMapping',
-              property: {
-                class: 'other::Person',
-                property: 'firm',
-              },
-              source: 'other_Person',
               classMapping: {
                 _type: 'embedded',
-                class: 'other::Firm',
                 primaryKey: [
                   {
                     _type: 'column',
@@ -3434,6 +3669,7 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                     table: {
                       _type: 'Table',
                       database: 'mapping::db',
+                      mainTableDb: 'mapping::db',
                       schema: 'default',
                       table: 'employeeFirmDenormTable',
                     },
@@ -3444,7 +3680,6 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                   {
                     _type: 'relationalPropertyMapping',
                     property: {
-                      class: 'other::Firm',
                       property: 'legalName',
                     },
                     relationalOperation: {
@@ -3453,29 +3688,22 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'mapping::db',
+                        mainTableDb: 'mapping::db',
                         schema: 'default',
                         table: 'employeeFirmDenormTable',
                       },
                       tableAlias: 'employeeFirmDenormTable',
                     },
-                    source: 'other_Person',
                   },
                   {
                     _type: 'embeddedPropertyMapping',
-                    property: {
-                      class: 'other::Firm',
-                      property: 'address',
-                    },
-                    source: 'other_Person',
                     classMapping: {
                       _type: 'embedded',
-                      class: 'other::Address',
                       primaryKey: [],
                       propertyMappings: [
                         {
                           _type: 'relationalPropertyMapping',
                           property: {
-                            class: 'other::Address',
                             property: 'line1',
                           },
                           relationalOperation: {
@@ -3484,37 +3712,37 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                             table: {
                               _type: 'Table',
                               database: 'mapping::db',
+                              mainTableDb: 'mapping::db',
                               schema: 'default',
                               table: 'employeeFirmDenormTable',
                             },
                             tableAlias: 'employeeFirmDenormTable',
                           },
-                          source: 'other_Person',
                         },
                       ],
                       root: false,
+                    },
+                    property: {
+                      property: 'address',
                     },
                   },
                 ],
                 root: false,
               },
+              property: {
+                class: 'other::Person',
+                property: 'firm',
+              },
             },
             {
               _type: 'embeddedPropertyMapping',
-              property: {
-                class: 'other::Person',
-                property: 'address',
-              },
-              source: 'other_Person',
               classMapping: {
                 _type: 'embedded',
-                class: 'other::Address',
                 primaryKey: [],
                 propertyMappings: [
                   {
                     _type: 'relationalPropertyMapping',
                     property: {
-                      class: 'other::Address',
                       property: 'line1',
                     },
                     relationalOperation: {
@@ -3523,15 +3751,19 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
                       table: {
                         _type: 'Table',
                         database: 'mapping::db',
+                        mainTableDb: 'mapping::db',
                         schema: 'default',
                         table: 'employeeFirmDenormTable',
                       },
                       tableAlias: 'employeeFirmDenormTable',
                     },
-                    source: 'other_Person',
                   },
                 ],
                 root: false,
+              },
+              property: {
+                class: 'other::Person',
+                property: 'address',
               },
             },
           ],
@@ -3539,6 +3771,7 @@ export const multiLevelEmbeddedRelationalRoundtrip = [
         },
       ],
       enumerationMappings: [],
+      includedMappings: [],
       name: 'myMapping',
       package: 'mappingPackage',
       tests: [],
@@ -3641,6 +3874,56 @@ export const testRelationalDatabaseConnectionRoundtrip = [
         type: 'Snowflake',
       },
       name: 'SnowflakeConnection',
+      package: 'simple',
+    },
+    classifierPath: 'meta::pure::runtime::PackageableConnection',
+  },
+  {
+    path: 'simple::H2ConnectionWithQuoteIdentifiers',
+    content: {
+      _type: 'connection',
+      connectionValue: {
+        _type: 'RelationalDatabaseConnection',
+        authenticationStrategy: {
+          _type: 'h2Default',
+        },
+        datasourceSpecification: {
+          _type: 'static',
+          databaseName: 'myDb',
+          host: 'somehost',
+          port: 999,
+        },
+        element: 'apps::pure::studio::relational::tests::dbInc',
+        quoteIdentifiers: true,
+        timeZone: 'IST',
+        type: 'H2',
+      },
+      name: 'H2ConnectionWithQuoteIdentifiers',
+      package: 'simple',
+    },
+    classifierPath: 'meta::pure::runtime::PackageableConnection',
+  },
+  {
+    path: 'simple::H2ConnectionWithQuoteIdentifiers1',
+    content: {
+      _type: 'connection',
+      connectionValue: {
+        _type: 'RelationalDatabaseConnection',
+        authenticationStrategy: {
+          _type: 'h2Default',
+        },
+        datasourceSpecification: {
+          _type: 'static',
+          databaseName: 'myDb',
+          host: 'somehost',
+          port: 999,
+        },
+        element: 'apps::pure::studio::relational::tests::dbInc',
+        quoteIdentifiers: false,
+        timeZone: 'IST',
+        type: 'H2',
+      },
+      name: 'H2ConnectionWithQuoteIdentifiers1',
       package: 'simple',
     },
     classifierPath: 'meta::pure::runtime::PackageableConnection',
@@ -7028,8 +7311,7 @@ export const testRelationalAssociationMapping = [
             upperBound: 1,
           },
           name: 'nested',
-          type:
-            'apps::meta::pure::tests::model::simple::PersonNameParameterNested',
+          type: 'apps::meta::pure::tests::model::simple::PersonNameParameterNested',
         },
       ],
     },
@@ -7366,6 +7648,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -7393,6 +7676,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -7404,6 +7688,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'PersonViewWithDistinct',
                 },
@@ -7428,6 +7713,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -7439,6 +7725,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personViewWithGroupBy',
                     },
@@ -7456,6 +7743,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -7467,6 +7755,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personViewWithGroupBy',
                     },
@@ -7489,6 +7778,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
@@ -7500,6 +7790,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -7520,6 +7811,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
@@ -7531,6 +7823,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7551,6 +7844,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -7562,6 +7856,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7582,6 +7877,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
@@ -7593,6 +7889,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7613,6 +7910,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmExtensionTable',
                 },
@@ -7624,6 +7922,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'PersonTableExtension',
                 },
@@ -7644,6 +7943,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7655,6 +7955,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
@@ -7675,6 +7976,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7686,6 +7988,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: '{target}',
                 },
@@ -7706,6 +8009,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
@@ -7717,6 +8021,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'placeOfInterestTable',
                 },
@@ -7737,6 +8042,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
@@ -7748,6 +8054,7 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'otherFirmTable',
                 },
@@ -8178,6 +8485,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -8192,6 +8500,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -8214,6 +8523,7 @@ export const testRelationalAssociationMapping = [
                       table: {
                         _type: 'Table',
                         database: 'apps::meta::relational::tests::dbInc',
+                        mainTableDb: 'apps::meta::relational::tests::dbInc',
                         schema: 'default',
                         table: 'firmTable',
                       },
@@ -8237,6 +8547,7 @@ export const testRelationalAssociationMapping = [
                     table: {
                       _type: 'Table',
                       database: 'apps::meta::relational::tests::dbInc',
+                      mainTableDb: 'apps::meta::relational::tests::dbInc',
                       schema: 'default',
                       table: 'personTable',
                     },
@@ -8255,6 +8566,7 @@ export const testRelationalAssociationMapping = [
                         table: {
                           _type: 'Table',
                           database: 'apps::meta::relational::tests::dbInc',
+                          mainTableDb: 'apps::meta::relational::tests::dbInc',
                           schema: 'default',
                           table: 'personTable',
                         },
@@ -8272,6 +8584,7 @@ export const testRelationalAssociationMapping = [
                   table: {
                     _type: 'Table',
                     database: 'apps::meta::relational::tests::dbInc',
+                    mainTableDb: 'apps::meta::relational::tests::dbInc',
                     schema: 'default',
                     table: 'personTable',
                   },
@@ -8299,6 +8612,7 @@ export const testRelationalAssociationMapping = [
                       table: {
                         _type: 'Table',
                         database: 'apps::meta::relational::tests::dbInc',
+                        mainTableDb: 'apps::meta::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -8322,6 +8636,7 @@ export const testRelationalAssociationMapping = [
                       table: {
                         _type: 'Table',
                         database: 'apps::meta::relational::tests::dbInc',
+                        mainTableDb: 'apps::meta::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -8345,6 +8660,7 @@ export const testRelationalAssociationMapping = [
                       table: {
                         _type: 'Table',
                         database: 'apps::meta::relational::tests::dbInc',
+                        mainTableDb: 'apps::meta::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -8368,6 +8684,7 @@ export const testRelationalAssociationMapping = [
                       table: {
                         _type: 'Table',
                         database: 'apps::meta::relational::tests::dbInc',
+                        mainTableDb: 'apps::meta::relational::tests::dbInc',
                         schema: 'default',
                         table: 'personTable',
                       },
@@ -8413,7 +8730,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_PlaceOfInterest',
               target: 'apps_meta_pure_tests_model_simple_Location',
             },
             {
@@ -8431,7 +8747,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Location',
               target: 'apps_meta_pure_tests_model_simple_PlaceOfInterest',
             },
           ],
@@ -8446,6 +8761,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'personTable',
           },
@@ -8456,6 +8772,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'personTable',
               },
@@ -8475,12 +8792,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
                 tableAlias: 'personTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8494,12 +8811,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
                 tableAlias: 'personTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8513,12 +8830,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
                 tableAlias: 'personTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8535,7 +8852,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
               target: 'apps_meta_pure_tests_model_simple_Firm',
             },
             {
@@ -8554,7 +8870,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
               target: 'apps_meta_pure_tests_model_simple_Address',
             },
             {
@@ -8573,7 +8888,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
               target: 'apps_meta_pure_tests_model_simple_Location',
             },
             {
@@ -8591,7 +8905,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Person',
               target: 'apps_meta_pure_tests_model_simple_Person',
             },
           ],
@@ -8604,6 +8917,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'firmTable',
           },
@@ -8614,6 +8928,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'firmTable',
               },
@@ -8633,12 +8948,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmTable',
                 },
                 tableAlias: 'firmTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Firm',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8655,7 +8970,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Firm',
               target: 'apps_meta_pure_tests_model_simple_Person',
             },
             {
@@ -8674,7 +8988,6 @@ export const testRelationalAssociationMapping = [
                   },
                 ],
               },
-              source: 'apps_meta_pure_tests_model_simple_Firm',
               target: 'apps_meta_pure_tests_model_simple_Address',
             },
           ],
@@ -8687,6 +9000,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'firmExtensionTable',
           },
@@ -8697,6 +9011,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'firmExtensionTable',
               },
@@ -8716,12 +9031,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmExtensionTable',
                 },
                 tableAlias: 'firmExtensionTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_FirmExtension',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8735,26 +9050,22 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'firmExtensionTable',
                 },
                 tableAlias: 'firmExtensionTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_FirmExtension',
             },
             {
               _type: 'embeddedPropertyMapping',
               classMapping: {
                 _type: 'embedded',
-                class:
-                  'apps::meta::pure::tests::model::simple::PersonExtension',
                 primaryKey: [],
                 propertyMappings: [
                   {
                     _type: 'relationalPropertyMapping',
                     property: {
-                      class:
-                        'apps::meta::pure::tests::model::simple::PersonExtension',
                       property: 'birthdate',
                     },
                     relationalOperation: {
@@ -8771,13 +9082,13 @@ export const testRelationalAssociationMapping = [
                         table: {
                           _type: 'Table',
                           database: 'apps::meta::relational::tests::dbInc',
+                          mainTableDb: 'apps::meta::relational::tests::dbInc',
                           schema: 'default',
                           table: 'PersonTableExtension',
                         },
                         tableAlias: 'PersonTableExtension',
                       },
                     },
-                    source: 'apps_meta_pure_tests_model_simple_FirmExtension',
                   },
                 ],
                 root: false,
@@ -8786,7 +9097,6 @@ export const testRelationalAssociationMapping = [
                 class: 'apps::meta::pure::tests::model::simple::FirmExtension',
                 property: 'employeesExt',
               },
-              source: 'apps_meta_pure_tests_model_simple_FirmExtension',
             },
           ],
           root: false,
@@ -8798,6 +9108,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'addressTable',
           },
@@ -8808,6 +9119,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'addressTable',
               },
@@ -8827,12 +9139,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
                 tableAlias: 'addressTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Address',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8846,12 +9158,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
                 tableAlias: 'addressTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Address',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8867,12 +9179,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
                 tableAlias: 'addressTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Address',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8886,12 +9198,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'addressTable',
                 },
                 tableAlias: 'addressTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Address',
             },
           ],
           root: false,
@@ -8903,6 +9215,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'locationTable',
           },
@@ -8913,6 +9226,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'locationTable',
               },
@@ -8932,12 +9246,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
                 tableAlias: 'locationTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Location',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -8951,12 +9265,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'locationTable',
                 },
                 tableAlias: 'locationTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_Location',
             },
           ],
           root: false,
@@ -8968,6 +9282,7 @@ export const testRelationalAssociationMapping = [
           mainTable: {
             _type: 'Table',
             database: 'apps::meta::relational::tests::dbInc',
+            mainTableDb: 'apps::meta::relational::tests::dbInc',
             schema: 'default',
             table: 'placeOfInterestTable',
           },
@@ -8978,6 +9293,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'placeOfInterestTable',
               },
@@ -8989,6 +9305,7 @@ export const testRelationalAssociationMapping = [
               table: {
                 _type: 'Table',
                 database: 'apps::meta::relational::tests::dbInc',
+                mainTableDb: 'apps::meta::relational::tests::dbInc',
                 schema: 'default',
                 table: 'placeOfInterestTable',
               },
@@ -9009,12 +9326,12 @@ export const testRelationalAssociationMapping = [
                 table: {
                   _type: 'Table',
                   database: 'apps::meta::relational::tests::dbInc',
+                  mainTableDb: 'apps::meta::relational::tests::dbInc',
                   schema: 'default',
                   table: 'placeOfInterestTable',
                 },
                 tableAlias: 'placeOfInterestTable',
               },
-              source: 'apps_meta_pure_tests_model_simple_PlaceOfInterest',
             },
           ],
           root: false,
@@ -9187,7 +9504,7 @@ export const testXStoreAssociationMapping = [
                 class: 'test::Person',
                 property: 'name',
               },
-              source: 'p',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -9221,7 +9538,7 @@ export const testXStoreAssociationMapping = [
                 class: 'test::Firm',
                 property: 'id',
               },
-              source: 'f',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -9246,7 +9563,7 @@ export const testXStoreAssociationMapping = [
                 class: 'test::Firm',
                 property: 'legalName',
               },
-              source: 'f',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [

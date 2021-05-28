@@ -40,12 +40,14 @@ import { V1_FlatDataConnection } from '../../../model/packageableElements/store/
 import { V1_RelationalDatabaseConnection } from '../../../model/packageableElements/store/relational/connection/V1_RelationalDatabaseConnection';
 import type { V1_DatasourceSpecification } from '../../../model/packageableElements/store/relational/connection/V1_DatasourceSpecification';
 import {
+  V1_LocalH2DataSourceSpecification,
   V1_SnowflakeDatasourceSpecification,
   V1_StaticDatasourceSpecification,
   V1_EmbeddedH2DatasourceSpecification,
 } from '../../../model/packageableElements/store/relational/connection/V1_DatasourceSpecification';
 import type { V1_AuthenticationStrategy } from '../../../model/packageableElements/store/relational/connection/V1_AuthenticationStrategy';
 import {
+  V1_SnowflakePublicAuthenticationStrategy,
   V1_OAuthAuthenticationStrategy,
   V1_DefaultH2AuthenticationStrategy,
   V1_DelegatedKerberosAuthenticationStrategy,
@@ -79,7 +81,7 @@ export const V1_modelChainConnectionModelSchema = createModelSchema(
   V1_ModelChainConnection,
   {
     _type: usingConstantValueSchema(V1_ConnectionType.MODEL_CHAIN_CONNECTION),
-    store: alias('element', primitive()),
+    store: alias('element', optional(primitive())), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     mappings: list(primitive()),
   },
 );
@@ -89,7 +91,7 @@ export const V1_jsonModelConnectionModelSchema = createModelSchema(
   {
     _type: usingConstantValueSchema(V1_ConnectionType.JSON_MODEL_CONNECTION),
     class: primitive(),
-    store: alias('element', primitive()),
+    store: alias('element', optional(primitive())), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     url: primitive(),
   },
 );
@@ -99,7 +101,7 @@ export const V1_xmlModelConnectionModelSchema = createModelSchema(
   {
     _type: usingConstantValueSchema(V1_ConnectionType.XML_MODEL_CONNECTION),
     class: primitive(),
-    store: alias('element', primitive()),
+    store: alias('element', optional(primitive())), // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
     url: primitive(),
   },
 );
@@ -118,6 +120,7 @@ export const V1_flatDataConnectionModelSchema = createModelSchema(
 enum V1_DatasourceSpecificationType {
   STATIC = 'static',
   H2_EMBEDDED = 'h2Embedded',
+  H2_LOCAL = 'h2Local',
   SNOWFLAKE = 'snowflake',
 }
 
@@ -138,6 +141,15 @@ const embeddedH2DatasourceSpecificationModelSchema = createModelSchema(
     autoServerMode: primitive(),
     databaseName: primitive(),
     directory: primitive(),
+  },
+);
+
+const localH2DatasourceSpecificationModelSchema = createModelSchema(
+  V1_LocalH2DataSourceSpecification,
+  {
+    _type: usingConstantValueSchema(V1_DatasourceSpecificationType.H2_LOCAL),
+    testDataSetupCsv: primitive(),
+    testDataSetupSqls: list(primitive()),
   },
 );
 
@@ -162,12 +174,17 @@ export const V1_serializeDatasourceSpecification = (
     return serialize(embeddedH2DatasourceSpecificationModelSchema, protocol);
   } else if (protocol instanceof V1_SnowflakeDatasourceSpecification) {
     return serialize(snowflakeDatasourceSpecificationModelSchema, protocol);
+  } else if (protocol instanceof V1_LocalH2DataSourceSpecification) {
+    return serialize(localH2DatasourceSpecificationModelSchema, protocol);
   }
-  const extraConnectionDatasourceSpecificationProtocolSerializers = plugins.flatMap(
-    (plugin) =>
-      (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionDatasourceSpecificationProtocolSerializers?.() ??
-      [],
-  );
+  const extraConnectionDatasourceSpecificationProtocolSerializers =
+    plugins.flatMap(
+      (plugin) =>
+        (
+          plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+        ).V1_getExtraConnectionDatasourceSpecificationProtocolSerializers?.() ??
+        [],
+    );
   for (const serializer of extraConnectionDatasourceSpecificationProtocolSerializers) {
     const json = serializer(protocol);
     if (json) {
@@ -192,12 +209,17 @@ export const V1_deserializeDatasourceSpecification = (
       return deserialize(embeddedH2DatasourceSpecificationModelSchema, json);
     case V1_DatasourceSpecificationType.SNOWFLAKE:
       return deserialize(snowflakeDatasourceSpecificationModelSchema, json);
+    case V1_DatasourceSpecificationType.H2_LOCAL:
+      return deserialize(localH2DatasourceSpecificationModelSchema, json);
     default: {
-      const extraConnectionDatasourceSpecificationProtocolDeserializers = plugins.flatMap(
-        (plugin) =>
-          (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionDatasourceSpecificationProtocolDeserializers?.() ??
-          [],
-      );
+      const extraConnectionDatasourceSpecificationProtocolDeserializers =
+        plugins.flatMap(
+          (plugin) =>
+            (
+              plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+            ).V1_getExtraConnectionDatasourceSpecificationProtocolDeserializers?.() ??
+            [],
+        );
       for (const deserializer of extraConnectionDatasourceSpecificationProtocolDeserializers) {
         const protocol = deserializer(json);
         if (protocol) {
@@ -215,6 +237,7 @@ export const V1_deserializeDatasourceSpecification = (
 
 enum V1_AuthenticationStrategyType {
   DELEGATED_KERBEROS = 'delegatedKerberos',
+  SNOWFLAKE_PUBLIC = 'snowflakePublic',
   H2_DEFAULT = 'h2Default',
   TEST = 'test',
   OAUTH = 'oauth',
@@ -238,6 +261,18 @@ const V1_defaultH2AuthenticationStrategyModelSchema = createModelSchema(
 const V1_testDatabaseAuthenticationStrategyModelSchema = createModelSchema(
   V1_TestDatabaseAuthenticationStrategy,
   { _type: usingConstantValueSchema(V1_AuthenticationStrategyType.TEST) },
+);
+
+const V1_snowflakePublicAuthenticationStrategyModelSchema = createModelSchema(
+  V1_SnowflakePublicAuthenticationStrategy,
+  {
+    _type: usingConstantValueSchema(
+      V1_AuthenticationStrategyType.SNOWFLAKE_PUBLIC,
+    ),
+    privateKeyVaultReference: primitive(),
+    passPhraseVaultReference: primitive(),
+    publicUserName: primitive(),
+  },
 );
 
 const V1_oAuthAuthenticationStrategyModelSchema = createModelSchema(
@@ -265,14 +300,22 @@ export const V1_serializeAuthenticationStrategy = (
       V1_testDatabaseAuthenticationStrategyModelSchema,
       protocol,
     );
+  } else if (protocol instanceof V1_SnowflakePublicAuthenticationStrategy) {
+    return serialize(
+      V1_snowflakePublicAuthenticationStrategyModelSchema,
+      protocol,
+    );
   } else if (protocol instanceof V1_OAuthAuthenticationStrategy) {
     return serialize(V1_oAuthAuthenticationStrategyModelSchema, protocol);
   }
-  const extraConnectionAuthenticationStrategyProtocolSerializers = plugins.flatMap(
-    (plugin) =>
-      (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionAuthenticationStrategyProtocolSerializers?.() ??
-      [],
-  );
+  const extraConnectionAuthenticationStrategyProtocolSerializers =
+    plugins.flatMap(
+      (plugin) =>
+        (
+          plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+        ).V1_getExtraConnectionAuthenticationStrategyProtocolSerializers?.() ??
+        [],
+    );
   for (const serializer of extraConnectionAuthenticationStrategyProtocolSerializers) {
     const json = serializer(protocol);
     if (json) {
@@ -298,6 +341,11 @@ export const V1_deserializeAuthenticationStrategy = (
       );
     case V1_AuthenticationStrategyType.H2_DEFAULT:
       return deserialize(V1_defaultH2AuthenticationStrategyModelSchema, json);
+    case V1_AuthenticationStrategyType.SNOWFLAKE_PUBLIC:
+      return deserialize(
+        V1_snowflakePublicAuthenticationStrategyModelSchema,
+        json,
+      );
     case V1_AuthenticationStrategyType.TEST:
       return deserialize(
         V1_testDatabaseAuthenticationStrategyModelSchema,
@@ -306,11 +354,14 @@ export const V1_deserializeAuthenticationStrategy = (
     case V1_AuthenticationStrategyType.OAUTH:
       return deserialize(V1_oAuthAuthenticationStrategyModelSchema, json);
     default: {
-      const extraConnectionAuthenticationStrategyProtocolDeserializers = plugins.flatMap(
-        (plugin) =>
-          (plugin as StoreRelational_PureProtocolProcessorPlugin_Extension).V1_getExtraConnectionAuthenticationStrategyProtocolDeserializers?.() ??
-          [],
-      );
+      const extraConnectionAuthenticationStrategyProtocolDeserializers =
+        plugins.flatMap(
+          (plugin) =>
+            (
+              plugin as StoreRelational_PureProtocolProcessorPlugin_Extension
+            ).V1_getExtraConnectionAuthenticationStrategyProtocolDeserializers?.() ??
+            [],
+        );
       for (const deserializer of extraConnectionAuthenticationStrategyProtocolDeserializers) {
         const protocol = deserializer(json);
         if (protocol) {

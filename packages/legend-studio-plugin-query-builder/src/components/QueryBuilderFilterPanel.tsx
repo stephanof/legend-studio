@@ -26,6 +26,7 @@ import {
   FaPlus,
   FaPlusCircle,
   FaTimes,
+  FaCircle,
   FaCaretDown,
 } from 'react-icons/fa';
 import { BsFillTriangleFill } from 'react-icons/bs';
@@ -225,7 +226,7 @@ const QueryBuilderFilterConditionEditor = observer(
             <button
               className="query-builder-filter-tree__condition-node__operator__dropdown__trigger"
               tabIndex={-1}
-              title="Choose Operation..."
+              title="Choose Operator..."
             >
               <FaCaretDown />
             </button>
@@ -234,6 +235,11 @@ const QueryBuilderFilterConditionEditor = observer(
             <div className="query-builder-filter-tree__condition-node__value">
               <QueryBuilderValueSpecificationEditor
                 valueSpecification={node.condition.value}
+                graph={node.condition.editorStore.graphState.graph}
+                expectedType={
+                  node.condition.propertyEditorState.propertyExpression.func
+                    .genericType.value.rawType
+                }
               />
             </div>
           )}
@@ -339,9 +345,8 @@ const QueryBuilderFilterTreeNodeContainer = observer(
     const { node, level, stepPaddingInRem, onNodeSelect, innerProps } = props;
     const { queryBuilderState } = innerProps;
     const ref = useRef<HTMLDivElement>(null);
-    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] = useState(
-      false,
-    );
+    const [isSelectedFromContextMenu, setIsSelectedFromContextMenu] =
+      useState(false);
     const editorStore = useEditorStore();
     const applicationStore = useApplicationStore();
     const filterState = queryBuilderState.filterState;
@@ -352,11 +357,9 @@ const QueryBuilderFilterTreeNodeContainer = observer(
 
     // Drag and Drop
     const handleDrop = useCallback(
-      (item: QueryBuilderFilterDropTarget): void => {
+      (item: QueryBuilderFilterDropTarget, type: string): void => {
         if (
-          Object.values<string>(QUERY_BUILDER_FILTER_DND_TYPE).includes(
-            item.type,
-          )
+          Object.values<string>(QUERY_BUILDER_FILTER_DND_TYPE).includes(type)
         ) {
           // const dropNode = (item as QueryBuilderFilterConditionDragSource).node;
           // TODO: re-arrange
@@ -423,7 +426,7 @@ const QueryBuilderFilterTreeNodeContainer = observer(
           monitor: DropTargetMonitor,
         ): void => {
           if (!monitor.didDrop()) {
-            handleDrop(item);
+            handleDrop(item, monitor.getItemType() as string);
           } // prevent drop event propagation to accomondate for nested DnD
         },
         // canDrop: (item: QueryBuilderFilterConditionDragSource, monitor: DropTargetMonitor): boolean => {
@@ -440,16 +443,13 @@ const QueryBuilderFilterTreeNodeContainer = observer(
     );
     const [, dragConnector, dragPreviewConnector] = useDrag(
       () => ({
-        item: {
-          type:
-            node instanceof QueryBuilderFilterTreeGroupNodeData
-              ? QUERY_BUILDER_FILTER_DND_TYPE.GROUP_CONDITION
-              : node instanceof QueryBuilderFilterTreeConditionNodeData
-              ? QUERY_BUILDER_FILTER_DND_TYPE.CONDITION
-              : QUERY_BUILDER_FILTER_DND_TYPE.BLANK_CONDITION,
-          node,
-        },
-        begin: (): void => filterState.setRearrangingConditions(true),
+        type:
+          node instanceof QueryBuilderFilterTreeGroupNodeData
+            ? QUERY_BUILDER_FILTER_DND_TYPE.GROUP_CONDITION
+            : node instanceof QueryBuilderFilterTreeConditionNodeData
+            ? QUERY_BUILDER_FILTER_DND_TYPE.CONDITION
+            : QUERY_BUILDER_FILTER_DND_TYPE.BLANK_CONDITION,
+        item: (): QueryBuilderFilterConditionDragSource => ({ node }),
         end: (): void => filterState.setRearrangingConditions(false),
       }),
       [node, filterState],
@@ -484,7 +484,8 @@ const QueryBuilderFilterTreeNodeContainer = observer(
                 filterState.isRearrangingConditions,
               'query-builder-filter-tree__node__container--selected':
                 node === filterState.selectedNode,
-              'query-builder-filter-tree__node__container--selected-from-context-menu': isSelectedFromContextMenu,
+              'query-builder-filter-tree__node__container--selected-from-context-menu':
+                isSelectedFromContextMenu,
             },
           )}
         >
@@ -508,7 +509,8 @@ const QueryBuilderFilterTreeNodeContainer = observer(
               className={clsx(
                 'tree-view__node__label query-builder-filter-tree__node__label',
                 {
-                  'query-builder-filter-tree__node__label--expandable': isExpandable,
+                  'query-builder-filter-tree__node__label--expandable':
+                    isExpandable,
                 },
               )}
             >
@@ -646,6 +648,10 @@ export const QueryBuilderFilterPanel = observer(
       filterState.suppressClickawayEventListener();
       filterState.pruneTree();
     };
+    const simplifyTree = (): void => {
+      filterState.suppressClickawayEventListener();
+      filterState.simplifyTree();
+    };
     const createCondition = (): void => {
       filterState.suppressClickawayEventListener();
       filterState.addNodeFromNode(
@@ -778,6 +784,14 @@ export const QueryBuilderFilterPanel = observer(
               title="Cleanup Tree"
             >
               <FaBrush />
+            </button>
+            <button
+              className="panel__header__action"
+              onClick={simplifyTree}
+              tabIndex={-1}
+              title="Simplify Tree"
+            >
+              <FaCircle />
             </button>
             <button
               className="panel__header__action"

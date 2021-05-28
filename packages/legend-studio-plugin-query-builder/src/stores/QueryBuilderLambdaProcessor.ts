@@ -169,7 +169,8 @@ const processFilterFunction = (
 };
 
 export class QueryBuilderLambdaProcessor
-  implements ValueSpecificationVisitor<void> {
+  implements ValueSpecificationVisitor<void>
+{
   queryBuilderState: QueryBuilderState;
   parentSimpleFunction?: SimpleFunctionExpression;
 
@@ -352,9 +353,10 @@ export class QueryBuilderLambdaProcessor
         const sortColumnName = getNullableStringValueFromValueSpec(
           valueSpecification.parametersValues[0],
         );
-        const queryBuilderProjectionColumnState = this.queryBuilderState.fetchStructureState.projectionColumns.find(
-          (e) => e.columnName === sortColumnName,
-        );
+        const queryBuilderProjectionColumnState =
+          this.queryBuilderState.fetchStructureState.projectionColumns.find(
+            (e) => e.columnName === sortColumnName,
+          );
         if (queryBuilderProjectionColumnState) {
           const editorStore = this.queryBuilderState.editorStore;
           const sortColumnState = new SortColumnState(
@@ -380,6 +382,13 @@ export class QueryBuilderLambdaProcessor
         const filterExpression = valueSpecification.parametersValues[1];
         if (filterExpression instanceof LambdaFunctionInstanceValue) {
           processFilterFunction(filterExpression, filterState);
+          /**
+           * NOTE: Since group operations ike and/or do not take more than 2 parameters, if there are
+           * more than 2 clauses in each group operations, then these clauses are converted into an
+           * unbalanced tree. However, this would look quite bad for UX, as such, we simplify the tree.
+           * After building the filter state.
+           */
+          filterState.simplifyTree();
           return;
         }
       }
@@ -450,10 +459,11 @@ export class QueryBuilderLambdaProcessor
     valueSpecification: AbstractPropertyExpression,
   ): void {
     if (this.getParentSimpleFunctionName() === SUPPORTED_FUNCTIONS.PROJECT) {
-      const columnState = this.queryBuilderState.fetchStructureState.addPropertyExpressionProjectionColumn(
-        valueSpecification,
-        true,
-      );
+      const columnState =
+        this.queryBuilderState.fetchStructureState.addPropertyExpressionProjectionColumn(
+          valueSpecification,
+          true,
+        );
       if (
         valueSpecification.parametersValues[0] instanceof VariableExpression
       ) {

@@ -26,7 +26,7 @@ import {
   guaranteeType,
 } from '@finos/legend-studio-shared';
 import type { EditorStore } from '../../../EditorStore';
-import { MappingElementDecorateVisitor } from '../../../editor-state/element-editor-state/mapping/MapingElementDecorateVisitor';
+import { MappingElementDecorateVisitor } from './MappingElementDecorateVisitor';
 import type { SourceInformation } from '../../../../models/metamodels/pure/action/SourceInformation';
 import type { CompilationError } from '../../../../models/metamodels/pure/action/EngineError';
 import { ParserError } from '../../../../models/metamodels/pure/action/EngineError';
@@ -61,10 +61,11 @@ export class FlatDataPropertyMappingState extends PropertyMappingState {
     const emptyLambda = RawLambda.createStub();
     if (this.lambdaString) {
       try {
-        const lambda = (yield this.editorStore.graphState.graphManager.pureCodeToLambda(
-          this.fullLambdaString,
-          this.propertyMapping.lambdaId,
-        )) as RawLambda | undefined;
+        const lambda =
+          (yield this.editorStore.graphState.graphManager.pureCodeToLambda(
+            this.fullLambdaString,
+            this.propertyMapping.lambdaId,
+          )) as RawLambda | undefined;
         this.setParserError(undefined);
         if (this.propertyMapping instanceof FlatDataPropertyMapping) {
           this.propertyMapping.transform = lambda ?? emptyLambda;
@@ -98,10 +99,11 @@ export class FlatDataPropertyMappingState extends PropertyMappingState {
             this.propertyMapping.lambdaId,
             this.propertyMapping.transform,
           );
-          const isolatedLambdas = (yield this.editorStore.graphState.graphManager.lambdaToPureCode(
-            lambdas,
-            pretty,
-          )) as Map<string, string>;
+          const isolatedLambdas =
+            (yield this.editorStore.graphState.graphManager.lambdaToPureCode(
+              lambdas,
+              pretty,
+            )) as Map<string, string>;
           const grammarText = isolatedLambdas.get(
             this.propertyMapping.lambdaId,
           );
@@ -208,9 +210,10 @@ export abstract class FlatDataInstanceSetImplementationState extends InstanceSet
     if (lambdas.size) {
       this.isConvertingTransformObjects = true;
       try {
-        const isolatedLambdas = (yield this.editorStore.graphState.graphManager.lambdaToPureCode(
-          lambdas,
-        )) as Map<string, string>;
+        const isolatedLambdas =
+          (yield this.editorStore.graphState.graphManager.lambdaToPureCode(
+            lambdas,
+          )) as Map<string, string>;
         isolatedLambdas.forEach((grammarText, key) => {
           const flatDataPropertyMappingState = propertyMappingStates.get(key);
           flatDataPropertyMappingState?.setLambdaString(
@@ -256,7 +259,8 @@ export abstract class FlatDataInstanceSetImplementationState extends InstanceSet
 
 export class EmbeddedFlatDataInstanceSetImplementationState
   extends FlatDataInstanceSetImplementationState
-  implements FlatDataPropertyMappingState {
+  implements FlatDataPropertyMappingState
+{
   // might need to have a root property pointing to the root set implementation state
   declare mappingElement: EmbeddedFlatDataPropertyMapping;
   declare propertyMapping: EmbeddedFlatDataPropertyMapping;
@@ -340,21 +344,8 @@ export class RootFlatDataInstanceSetImplementationState extends FlatDataInstance
     super(editorStore, setImplementation);
 
     this.mappingElement = setImplementation;
-    this.propertyMappingStates = setImplementation.propertyMappings.map(
-      (propertyMapping) => {
-        if (propertyMapping instanceof FlatDataPropertyMapping) {
-          return new FlatDataPropertyMappingState(
-            propertyMapping,
-            this.editorStore,
-          );
-        } else if (propertyMapping instanceof EmbeddedFlatDataPropertyMapping) {
-          return new EmbeddedFlatDataInstanceSetImplementationState(
-            editorStore,
-            propertyMapping,
-          );
-        }
-        throw new UnsupportedOperationError();
-      },
+    this.propertyMappingStates = this.getPropertyMappingStates(
+      setImplementation.propertyMappings,
     );
   }
 

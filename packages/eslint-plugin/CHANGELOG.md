@@ -1,12 +1,30 @@
 # @finos/eslint-plugin-legend-studio
 
+## 0.0.12
+
+## 0.0.11
+
+### Patch Changes
+
+- [#211](https://github.com/finos/legend-studio/pull/211) [`86cd535`](https://github.com/finos/legend-studio/commit/86cd535e1df97f722bcd69270e84d82a6d1ff6e1) Thanks [@akphi](https://github.com/akphi)! - As we upgraded to `prettier@2.3.0` we will disable `eslint(brace-style)` rule due to conflict and let `prettier` manage this.
+
+## 0.0.10
+
+## 0.0.9
+
+## 0.0.8
+
+## 0.0.7
+
+## 0.0.6
+
 ## 0.0.5
 
 ## 0.0.4
 
 ### Patch Changes
 
-- [#102](https://github.com/finos/legend-studio/pull/102) [`492e022`](https://github.com/finos/legend-studio/commit/492e02229d27fc5ef0e1bafbbd8672de0449081f) Thanks [@akphi](https://github.com/akphi)! - Update publish content avoid list
+- [#102](https://github.com/finos/legend-studio/pull/102) [`492e022`](https://github.com/finos/legend-studio/commit/492e02229d27fc5ef0e1bafbbd8672de0449081f) Thanks [@akphi](https://github.com/akphi)! - Update publish content avoid list.
 
 ## 0.0.3
 

@@ -30,7 +30,8 @@ import type { PackageableElementReference } from '../../../../../model/packageab
 
 export class JsonModelConnection
   extends PureModelConnection
-  implements Hashable {
+  implements Hashable
+{
   public static readonly CONTENT_TYPE = ContentType.APPLICATION_JSON;
 
   class: PackageableElementReference<Class>;
@@ -68,7 +69,6 @@ export class JsonModelConnection
   get hashCode(): string {
     return hashArray([
       CORE_HASH_STRUCTURE.JSON_MODEL_CONNECTION,
-      super.hashCode,
       this.class.valueForSerialization,
       this.url,
     ]);

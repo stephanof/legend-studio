@@ -51,6 +51,10 @@ export class SystemGraphProcessingError extends EnrichedError {
 export const fromElementPathToMappingElementId = (className: string): string =>
   className.split(ELEMENT_PATH_DELIMITER).join('_');
 
+/**
+ * This method concatenate 2 fully-qualified elementh paths to form a single one
+ * and then extracts the name and package part from it.
+ */
 export const resolvePackageNameAndElementName = (
   defaultPath: string,
   path: string,
@@ -65,19 +69,16 @@ export const resolvePackageNameAndElementName = (
 export const isValidFullPath = (fullPath: string): boolean =>
   fullPath.split(ELEMENT_PATH_DELIMITER).filter(Boolean).length > 1;
 
+export const hashObjectWithoutSourceInformation = (val: object): string =>
+  hashObject(val, {
+    excludeKeys: (key: string) => key === SOURCE_INFORMATION_KEY,
+  });
+
 export const hashLambda = (
   parameters: object | undefined,
   body: object | undefined,
 ): string =>
   hashArray([
-    parameters
-      ? hashObject(parameters, {
-          excludeKeys: (key: string) => key === SOURCE_INFORMATION_KEY,
-        })
-      : '',
-    body
-      ? hashObject(body, {
-          excludeKeys: (key: string) => key === SOURCE_INFORMATION_KEY,
-        })
-      : '',
+    parameters ? hashObjectWithoutSourceInformation(parameters) : '',
+    body ? hashObjectWithoutSourceInformation(body) : '',
   ]);

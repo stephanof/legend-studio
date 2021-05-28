@@ -120,6 +120,8 @@ import type { V1_TDSSortInformation } from '../../../../model/valueSpecification
 import type { V1_UnitInstance } from '../../../../model/valueSpecification/raw/V1_UnitInstance';
 import type { V1_UnitType } from '../../../../model/valueSpecification/raw/V1_UnitType';
 import { V1_getAppliedProperty } from './V1_DomainBuilderHelper';
+import { Enumeration } from '../../../../../../../metamodels/pure/model/packageableElements/domain/Enumeration';
+import { EnumValueExplicitReference } from '../../../../../../../metamodels/pure/model/packageableElements/domain/EnumValueReference';
 
 const LET_FUNCTION = 'letFunction';
 
@@ -136,7 +138,8 @@ const getPrimtiveInstanceValue = (
 };
 
 export class V1_ValueSpecificationBuilder
-  implements V1_ValueSpecificationVisitor<ValueSpecification> {
+  implements V1_ValueSpecificationVisitor<ValueSpecification>
+{
   context: V1_GraphBuilderContext;
   processingContext: V1_ProcessingContext;
   openVariables: string[] = [];
@@ -167,7 +170,7 @@ export class V1_ValueSpecificationBuilder
       const vs = this.processingContext.getInferredVariable(variable.name);
       if (!vs) {
         throw new GraphError(
-          `Can't find variable class for variable '${variable.name}' in the graph`,
+          `Can't find variable '${variable.name}' in the graph`,
         );
       }
       return vs;
@@ -179,7 +182,7 @@ export class V1_ValueSpecificationBuilder
       valueSpecification.body,
       valueSpecification.parameters,
       this.context,
-      this.processingContext,
+      this.processingContext.clone(), // clone the context for lambda
     );
     const instance = new LambdaFunctionInstanceValue(
       this.context.graph.getTypicalMultiplicity(TYPICAL_MULTIPLICITY_TYPE.ONE),
@@ -605,18 +608,6 @@ export function V1_buildLambdaBody(
   return _lambda;
 }
 
-export function V1_buildLambda(
-  lambda: V1_Lambda,
-  context: V1_GraphBuilderContext,
-): LambdaFunction {
-  return V1_buildLambdaBody(
-    lambda.body,
-    lambda.parameters,
-    context,
-    new V1_ProcessingContext('build V1_Lambda'),
-  );
-}
-
 export function V1_buildValueSpecification(
   valueSpecification: V1_ValueSpecification,
   context: V1_GraphBuilderContext,
@@ -690,9 +681,8 @@ function buildPropertyGraphFetchTree(
     _multiplicity.lowerBound = 1;
     _multiplicity.upperBound = 1;
     thisVariable.multiplicity = _multiplicity;
-    const parameters: V1_ValueSpecification[] = propertyGraphFetchTree.parameters.concat(
-      [thisVariable],
-    );
+    const parameters: V1_ValueSpecification[] =
+      propertyGraphFetchTree.parameters.concat([thisVariable]);
     property = V1_getAppliedProperty(
       parentClass,
       parameters,
@@ -747,9 +737,8 @@ function buildPropertyGraphFetchTree(
   );
   _propertyGraphFetchTree.parameters = pureParameters;
   _propertyGraphFetchTree.alias = propertyGraphFetchTree.alias;
-  _propertyGraphFetchTree.subType = OptionalPackageableElementExplicitReference.create<Class>(
-    _subType?.value,
-  );
+  _propertyGraphFetchTree.subType =
+    OptionalPackageableElementExplicitReference.create<Class>(_subType?.value);
   _propertyGraphFetchTree.subTrees = children;
   return _propertyGraphFetchTree;
 }
@@ -790,13 +779,14 @@ export function V1_processExecutionContext(
       executionContext.queryTimeOutInSeconds;
     return _executioncontext;
   } else if (executionContext instanceof V1_AnalyticsExecutionContext) {
-    const vs = executionContext.toFlowSetFunction.accept_ValueSpecificationVisitor(
-      new V1_ValueSpecificationBuilder(
-        context,
-        new V1_ProcessingContext(''),
-        [],
-      ),
-    );
+    const vs =
+      executionContext.toFlowSetFunction.accept_ValueSpecificationVisitor(
+        new V1_ValueSpecificationBuilder(
+          context,
+          new V1_ProcessingContext(''),
+          [],
+        ),
+      );
     const instance = guaranteeType(vs, InstanceValue);
     const lambdaFunc = guaranteeType(instance.values[0], LambdaFunction);
     const _analyticsExecutionContext = new AnalyticsExecutionContext(
@@ -862,9 +852,18 @@ export function V1_processProperty(
     );
     processedProperty.parametersValues = processedParameters;
     return processedProperty;
+  } else if (inferredType instanceof Enumeration) {
+    const enumValueInstanceValue = new EnumValueInstanceValue(
+      GenericTypeExplicitReference.create(new GenericType(inferredType)),
+      context.graph.getTypicalMultiplicity(TYPICAL_MULTIPLICITY_TYPE.ONE),
+    );
+    enumValueInstanceValue.values = [
+      EnumValueExplicitReference.create(inferredType.getValue(property)),
+    ];
+    return enumValueInstanceValue;
   }
   throw new Error(
-    `Unable to resolve property for type '${inferredType?.name}'`,
+    `Unable to resolve property '${property}' of type '${inferredType?.name}'`,
   );
 }
 
@@ -932,6 +931,15 @@ export function V1_buildFunctionExpression(
         processingContext,
       );
     }
+    case SUPPORTED_FUNCTIONS.EXISTS: {
+      return V1_buildExistsFunctionExpression(
+        functionName,
+        parameters,
+        openVariables,
+        compileContext,
+        processingContext,
+      );
+    }
     default: {
       const processed = parameters.map((p) =>
         p.accept_ValueSpecificationVisitor(
@@ -953,6 +961,74 @@ export function V1_buildFunctionExpression(
 }
 
 // ------------------------------------------ RESOLVE SUPPORTED FUNCTIONS -----------------------------------------
+
+export function V1_buildExistsFunctionExpression(
+  functionName: string,
+  parameters: V1_ValueSpecification[],
+  openVariables: string[],
+  compileContext: V1_GraphBuilderContext,
+  processingContext: V1_ProcessingContext,
+): [SimpleFunctionExpression, ValueSpecification[]] {
+  if (parameters.length === 2) {
+    const processedValue = parameters[0].accept_ValueSpecificationVisitor(
+      new V1_ValueSpecificationBuilder(
+        compileContext,
+        processingContext,
+        openVariables,
+      ),
+    );
+    processedValue.genericType = guaranteeType(
+      processedValue,
+      AbstractPropertyExpression,
+    ).func.genericType;
+    const lambda = parameters[1];
+    if (lambda instanceof V1_Lambda) {
+      lambda.parameters.forEach((p): void => {
+        if (p.name && !p.class) {
+          const _var = new VariableExpression(
+            p.name,
+            compileContext.graph.getTypicalMultiplicity(
+              TYPICAL_MULTIPLICITY_TYPE.ONE,
+            ),
+          );
+          _var.genericType = processedValue.genericType;
+          processingContext.addInferredVariables(p.name, _var);
+        }
+      });
+    }
+    const _processed = [
+      processedValue,
+      parameters[1].accept_ValueSpecificationVisitor(
+        new V1_ValueSpecificationBuilder(
+          compileContext,
+          processingContext,
+          openVariables,
+        ),
+      ),
+    ];
+    const _simpleFunction = processSimpleFunctionExpression(
+      _processed,
+      functionName,
+      compileContext,
+    );
+    return [_simpleFunction, _processed];
+  }
+  const processed = parameters.map((p) =>
+    p.accept_ValueSpecificationVisitor(
+      new V1_ValueSpecificationBuilder(
+        compileContext,
+        processingContext,
+        openVariables,
+      ),
+    ),
+  );
+  const simpleFunction = processSimpleFunctionExpression(
+    processed,
+    functionName,
+    compileContext,
+  );
+  return [simpleFunction, processed];
+}
 
 export function V1_buildFilterFunctionExpression(
   functionName: string,
@@ -999,7 +1075,7 @@ export function V1_buildFilterFunctionExpression(
       functionName,
       compileContext,
     );
-    // return type of filtered is of type of param 0
+    // return type of filtered is of type of param 0 - filter_T_MANY__Function_1__T_MANY_
     _simpleFunction.genericType = processedValue.genericType;
     _simpleFunction.multiplicity = processedValue.multiplicity;
     return [_simpleFunction, _processed];

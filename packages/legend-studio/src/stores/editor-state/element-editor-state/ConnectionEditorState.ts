@@ -37,10 +37,12 @@ import {
   DefaultH2AuthenticationStrategy,
   DelegatedKerberosAuthenticationStrategy,
   OAuthAuthenticationStrategy,
+  SnowflakePublicAuthenticationStrategy,
   TestDatabaseAuthenticationStrategy,
 } from '../../../models/metamodels/pure/model/packageableElements/store/relational/connection/AuthenticationStrategy';
 import {
   EmbeddedH2DatasourceSpecification,
+  LocalH2DatasourceSpecification,
   SnowflakeDatasourceSpecification,
   StaticDatasourceSpecification,
 } from '../../../models/metamodels/pure/model/packageableElements/store/relational/connection/DatasourceSpecification';
@@ -74,6 +76,7 @@ export enum RELATIONAL_DATABASE_TABE {
 
 export enum CORE_DATASOURCE_SPEC_TYPE {
   STATIC = 'STATIC',
+  H2_LOCAL = 'H2_LOCAL',
   H2_EMBEDDED = 'H2_EMBEDDED',
   SNOWFLAKE = 'SNOWFLAKE',
 }
@@ -81,6 +84,7 @@ export enum CORE_DATASOURCE_SPEC_TYPE {
 export enum CORE_AUTHENTICATION_STRATEGY_TYPE {
   DELEGATED_KERBEROS = 'DELEGATED_KERBEROS',
   H2_DEFAULT = 'H2_DEFAULT',
+  SNOWFLAKE_PUBLIC = 'SNOWFLAKE_PUBLIC',
   TEST = 'TEST',
   OAUTH = 'OAUTH',
 }
@@ -161,9 +165,10 @@ export class GenerateStoreState {
       generateStoreInput.enrichPrimaryKeys = true;
       generateStoreInput.enrichColumns = true;
       generateStoreInput.patterns = this.patterns;
-      const storeGrammar = ((yield this.editorStore.graphState.graphManager.generateStore(
-        generateStoreInput,
-      )) as unknown) as string;
+      const storeGrammar =
+        (yield this.editorStore.graphState.graphManager.generateStore(
+          generateStoreInput,
+        )) as unknown as string;
       this.setStoreGrammar(storeGrammar);
     } catch (error: unknown) {
       this.editorStore.applicationStore.logger.error(
@@ -180,10 +185,10 @@ export class GenerateStoreState {
     try {
       this.isSavingStore = true;
       assertNonEmptyString(this.storeGrammar, 'Store Grammar cannot be empty');
-      const store = ((yield this.editorStore.graphState.graphManager.saveStore(
+      const store = (yield this.editorStore.graphState.graphManager.saveStore(
         this.storeGrammar,
         this.editorStore.graphState.graph,
-      )) as unknown) as Store;
+      )) as unknown as Store;
       this.editorStore.applicationStore.notifySuccess(
         `Store ${store.path} saved`,
       );
@@ -243,14 +248,18 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
       return CORE_DATASOURCE_SPEC_TYPE.H2_EMBEDDED;
     } else if (spec instanceof SnowflakeDatasourceSpecification) {
       return CORE_DATASOURCE_SPEC_TYPE.SNOWFLAKE;
+    } else if (spec instanceof LocalH2DatasourceSpecification) {
+      return CORE_DATASOURCE_SPEC_TYPE.H2_LOCAL;
     }
-    const extraDatasourceSpecificationTypeGetters = this.editorStore.applicationStore.pluginManager
-      .getEditorPlugins()
-      .flatMap(
-        (plugin) =>
-          (plugin as StoreRelational_EditorPlugin_Extension).getExtraDatasourceSpecificationTypeGetters?.() ??
-          [],
-      );
+    const extraDatasourceSpecificationTypeGetters =
+      this.editorStore.applicationStore.pluginManager
+        .getEditorPlugins()
+        .flatMap(
+          (plugin) =>
+            (
+              plugin as StoreRelational_EditorPlugin_Extension
+            ).getExtraDatasourceSpecificationTypeGetters?.() ?? [],
+        );
     for (const typeGetter of extraDatasourceSpecificationTypeGetters) {
       const type = typeGetter(spec);
       if (type) {
@@ -272,6 +281,12 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
         );
         return;
       }
+      case CORE_DATASOURCE_SPEC_TYPE.H2_LOCAL: {
+        this.connection.setDatasourceSpecification(
+          new LocalH2DatasourceSpecification(),
+        );
+        return;
+      }
       case CORE_DATASOURCE_SPEC_TYPE.H2_EMBEDDED: {
         this.connection.setDatasourceSpecification(
           new EmbeddedH2DatasourceSpecification('', '', false),
@@ -285,13 +300,15 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
         return;
       }
       default: {
-        const extraDatasourceSpecificationCreators = this.editorStore.applicationStore.pluginManager
-          .getEditorPlugins()
-          .flatMap(
-            (plugin) =>
-              (plugin as StoreRelational_EditorPlugin_Extension).getExtraDatasourceSpecificationCreators?.() ??
-              [],
-          );
+        const extraDatasourceSpecificationCreators =
+          this.editorStore.applicationStore.pluginManager
+            .getEditorPlugins()
+            .flatMap(
+              (plugin) =>
+                (
+                  plugin as StoreRelational_EditorPlugin_Extension
+                ).getExtraDatasourceSpecificationCreators?.() ?? [],
+            );
         for (const creator of extraDatasourceSpecificationCreators) {
           const spec = creator(type);
           if (spec) {
@@ -315,14 +332,18 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
       return CORE_AUTHENTICATION_STRATEGY_TYPE.H2_DEFAULT;
     } else if (auth instanceof OAuthAuthenticationStrategy) {
       return CORE_AUTHENTICATION_STRATEGY_TYPE.OAUTH;
+    } else if (auth instanceof SnowflakePublicAuthenticationStrategy) {
+      return CORE_AUTHENTICATION_STRATEGY_TYPE.SNOWFLAKE_PUBLIC;
     }
-    const extraAuthenticationStrategyTypeGetters = this.editorStore.applicationStore.pluginManager
-      .getEditorPlugins()
-      .flatMap(
-        (plugin) =>
-          (plugin as StoreRelational_EditorPlugin_Extension).getExtraAuthenticationStrategyTypeGetters?.() ??
-          [],
-      );
+    const extraAuthenticationStrategyTypeGetters =
+      this.editorStore.applicationStore.pluginManager
+        .getEditorPlugins()
+        .flatMap(
+          (plugin) =>
+            (
+              plugin as StoreRelational_EditorPlugin_Extension
+            ).getExtraAuthenticationStrategyTypeGetters?.() ?? [],
+        );
     for (const typeGetter of extraAuthenticationStrategyTypeGetters) {
       const type = typeGetter(auth);
       if (type) {
@@ -344,6 +365,12 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
         );
         return;
       }
+      case CORE_AUTHENTICATION_STRATEGY_TYPE.SNOWFLAKE_PUBLIC: {
+        this.connection.setAuthenticationStrategy(
+          new SnowflakePublicAuthenticationStrategy('', '', ''),
+        );
+        return;
+      }
       case CORE_AUTHENTICATION_STRATEGY_TYPE.H2_DEFAULT: {
         this.connection.setAuthenticationStrategy(
           new DefaultH2AuthenticationStrategy(),
@@ -362,13 +389,15 @@ export class RelationalDatabaseConnectionValueState extends ConnectionValueState
         );
         return;
       default: {
-        const extraAuthenticationStrategyCreators = this.editorStore.applicationStore.pluginManager
-          .getEditorPlugins()
-          .flatMap(
-            (plugin) =>
-              (plugin as StoreRelational_EditorPlugin_Extension).getExtraAuthenticationStrategyCreators?.() ??
-              [],
-          );
+        const extraAuthenticationStrategyCreators =
+          this.editorStore.applicationStore.pluginManager
+            .getEditorPlugins()
+            .flatMap(
+              (plugin) =>
+                (
+                  plugin as StoreRelational_EditorPlugin_Extension
+                ).getExtraAuthenticationStrategyCreators?.() ?? [],
+            );
         for (const creator of extraAuthenticationStrategyCreators) {
           const auth = creator(type);
           if (auth) {

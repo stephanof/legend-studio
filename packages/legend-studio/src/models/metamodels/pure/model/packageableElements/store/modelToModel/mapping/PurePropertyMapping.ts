@@ -32,9 +32,10 @@ import type { Stubable } from '../../../../../model/Stubable';
 
 export class PurePropertyMapping
   extends PropertyMapping
-  implements Hashable, Stubable {
+  implements Hashable, Stubable
+{
   transformer?: EnumerationMapping;
-  transform: RawLambda;
+  transform: RawLambda; // @MARKER GENERATED MODEL DISCREPANCY --- Studio does not process lambda
   explodeProperty?: boolean;
 
   constructor(

@@ -27,11 +27,17 @@ import type {
   ExplorerContextMenuItemRendererConfiguration,
   TEMP__ServiceQueryEditorRendererConfiguration,
   ServicePureExecutionState,
+  MappingExecutionQueryEditorRendererConfiguration,
+  MappingExecutionState,
+  MappingTestQueryEditorRendererConfiguration,
+  MappingTestState,
 } from '@finos/legend-studio';
 import { Class, EditorPlugin } from '@finos/legend-studio';
 import { MenuContentItem } from '@finos/legend-studio-components';
 import { QueryBuilderDialog } from './components/QueryBuilderDialog';
 import { ServiceQueryBuilder } from './components/ServiceQueryBuilder';
+import { MappingExecutionQueryBuilder } from './components/MappingExecutionQueryBuilder';
+import { MappingTestQueryBuilder } from './components/MappingTestQueryBuilder';
 import { QueryBuilderState } from './stores/QueryBuilderState';
 import { flowResult } from 'mobx';
 import type { IKeyboardEvent } from 'monaco-editor';
@@ -44,6 +50,10 @@ export class QueryBuilderPlugin extends EditorPlugin {
 
   install(pluginManager: PluginManager): void {
     pluginManager.registerEditorPlugin(this);
+  }
+
+  configure(_configData: object): QueryBuilderPlugin {
+    return this;
   }
 
   getExtraEditorExtensionComponentRendererConfigurations(): EditorExtensionComponentRendererConfiguration[] {
@@ -76,9 +86,8 @@ export class QueryBuilderPlugin extends EditorPlugin {
         ): React.ReactNode | undefined => {
           if (element instanceof Class) {
             const buildQuery = async (): Promise<void> => {
-              const queryBuilderState = editorStore.getEditorExtensionState(
-                QueryBuilderState,
-              );
+              const queryBuilderState =
+                editorStore.getEditorExtensionState(QueryBuilderState);
               await flowResult(queryBuilderState.setOpenQueryBuilder(true));
               if (queryBuilderState.openQueryBuilder) {
                 queryBuilderState.querySetupState.setClass(element);
@@ -108,9 +117,8 @@ export class QueryBuilderPlugin extends EditorPlugin {
           lambdaEditorState: LambdaEditorState,
           checkParseringError: boolean,
         ): void => {
-          const queryBuilderState = editorStore.getEditorExtensionState(
-            QueryBuilderState,
-          );
+          const queryBuilderState =
+            editorStore.getEditorExtensionState(QueryBuilderState);
           if (queryBuilderState.isEditingInTextMode()) {
             editorStore.graphState
               .checkLambdaParsingError(
@@ -120,6 +128,34 @@ export class QueryBuilderPlugin extends EditorPlugin {
               )
               .catch(editorStore.applicationStore.alertIllegalUnhandledError);
           }
+        },
+      },
+    ];
+  }
+
+  getExtraMappingExecutionQueryEditorRendererConfigurations(): MappingExecutionQueryEditorRendererConfiguration[] {
+    return [
+      {
+        key: 'build-query-context-menu-action',
+        renderer: function MappingExecutionQueryBuilderRenderer(
+          executionState: MappingExecutionState,
+        ): React.ReactNode | undefined {
+          return (
+            <MappingExecutionQueryBuilder executionState={executionState} />
+          );
+        },
+      },
+    ];
+  }
+
+  getExtraMappingTestQueryEditorRendererConfigurations(): MappingTestQueryEditorRendererConfiguration[] {
+    return [
+      {
+        key: 'build-query-context-menu-action',
+        renderer: function MappingTestQueryBuilderRenderer(
+          testState: MappingTestState,
+        ): React.ReactNode | undefined {
+          return <MappingTestQueryBuilder testState={testState} />;
         },
       },
     ];

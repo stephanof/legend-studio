@@ -88,7 +88,7 @@ import { FileGenerationViewerState } from './editor-state/FileGenerationViewerSt
 import type { GenerationFile } from './shared/FileGenerationTreeUtil';
 import type { ElementFileGenerationState } from './editor-state/element-editor-state/ElementFileGenerationState';
 import { DevToolState } from './aux-panel-state/DevToolState';
-import { generateSetupRoute } from './Router';
+import { generateSetupRoute, generateViewProjectRoute } from './Router';
 import { NonBlockingDialogState } from '@finos/legend-studio-components';
 import type {
   PackageableElement,
@@ -381,34 +381,125 @@ export class EditorStore {
       this.initState.conclude(hasBuildSucceeded);
     };
 
-    yield this.sdlcState.fetchCurrentProject(projectId);
+    yield this.sdlcState.fetchCurrentProject(projectId, {
+      suppressNotification: true,
+    });
     if (!this.sdlcState.currentProject) {
-      this.applicationStore.logger.warn(
-        CORE_LOG_EVENT.SDLC_PROBLEM,
-        `Project '${projectId}' does not exist! Redirecting ...`,
-      );
-      this.applicationStore.historyApiClient.push(
-        generateSetupRoute(
-          this.applicationStore.config.sdlcServerKey,
-          undefined,
-        ),
-      );
+      // If the project is not found or the user does not have access to it,
+      // we will not automatically redirect them to the setup page as they will lose the URL
+      // instead, we give them the option to:
+      // - reload the page (in case they later gain access)
+      // - back to the setup page
+      this.setActionAltertInfo({
+        message: `Project not found or inaccessible`,
+        prompt: 'Please check that the project exists and request access to it',
+        type: ActionAlertType.STANDARD,
+        onEnter: (): void => this.setBlockGlobalHotkeys(true),
+        onClose: (): void => this.setBlockGlobalHotkeys(false),
+        actions: [
+          {
+            label: 'Reload application',
+            default: true,
+            type: ActionAlertActionType.STANDARD,
+            handler: (): void => {
+              window.location.reload();
+            },
+          },
+          {
+            label: 'Back to setup page',
+            type: ActionAlertActionType.STANDARD,
+            handler: (): void => {
+              this.applicationStore.historyApiClient.push(
+                generateSetupRoute(
+                  this.applicationStore.config.sdlcServerKey,
+                  undefined,
+                ),
+              );
+            },
+          },
+        ],
+      });
       onLeave(false);
       return;
     }
-    yield this.sdlcState.fetchCurrentWorkspace(projectId, workspaceId);
+    yield this.sdlcState.fetchCurrentWorkspace(projectId, workspaceId, {
+      suppressNotification: true,
+    });
     if (!this.sdlcState.currentWorkspace) {
-      this.applicationStore.logger.warn(
-        CORE_LOG_EVENT.SETUP_PROBLEM,
-        `Workspace '${workspaceId}' of project '${projectId}' does not exist! Redirecting ...`,
-      );
-      this.applicationStore.historyApiClient.push(
-        generateSetupRoute(
-          this.applicationStore.config.sdlcServerKey,
-          projectId,
-          workspaceId,
-        ),
-      );
+      // If the workspace is not found,
+      // we will not automatically redirect the user to the setup page as they will lose the URL
+      // instead, we give them the option to:
+      // - create the workspace
+      // - view project
+      // - back to the setup page
+      const createWorkspaceAndRelaunch = async (): Promise<void> => {
+        try {
+          this.applicationStore.setBlockingAlert({
+            message: 'Creating workspace...',
+            prompt: 'Please do not close the application',
+          });
+          const workspace =
+            await this.applicationStore.networkClientManager.sdlcClient.createWorkspace(
+              projectId,
+              workspaceId,
+            );
+          this.applicationStore.setBlockingAlert(undefined);
+          this.applicationStore.notifySuccess(
+            `Workspace '${workspace.workspaceId}' is succesfully created. Reloading application...`,
+          );
+          window.location.reload();
+        } catch (error: unknown) {
+          this.applicationStore.logger.error(
+            CORE_LOG_EVENT.SETUP_PROBLEM,
+            error,
+          );
+          this.applicationStore.notifyError(error);
+        }
+      };
+      this.setActionAltertInfo({
+        message: 'Workspace not found',
+        prompt: `Please note that you can check out the project in viewer mode. Workspace is only required if you need to work on the project.`,
+        type: ActionAlertType.STANDARD,
+        onEnter: (): void => this.setBlockGlobalHotkeys(true),
+        onClose: (): void => this.setBlockGlobalHotkeys(false),
+        actions: [
+          {
+            label: 'View project',
+            default: true,
+            type: ActionAlertActionType.STANDARD,
+            handler: (): void => {
+              this.applicationStore.historyApiClient.push(
+                generateViewProjectRoute(
+                  this.applicationStore.config.sdlcServerKey,
+                  projectId,
+                ),
+              );
+            },
+          },
+          {
+            label: 'Create workspace',
+            type: ActionAlertActionType.STANDARD,
+            handler: (): void => {
+              createWorkspaceAndRelaunch().catch(
+                this.applicationStore.alertIllegalUnhandledError,
+              );
+            },
+          },
+          {
+            label: 'Back to setup page',
+            type: ActionAlertActionType.STANDARD,
+            handler: (): void => {
+              this.applicationStore.historyApiClient.push(
+                generateSetupRoute(
+                  this.applicationStore.config.sdlcServerKey,
+                  projectId,
+                  workspaceId,
+                ),
+              );
+            },
+          },
+        ],
+      });
       onLeave(false);
       return;
     }
@@ -808,8 +899,9 @@ export class EditorStore {
       .getEditorPlugins()
       .flatMap(
         (plugin) =>
-          (plugin as DSL_EditorPlugin_Extension).getExtraElementEditorStateCreators?.() ??
-          [],
+          (
+            plugin as DSL_EditorPlugin_Extension
+          ).getExtraElementEditorStateCreators?.() ?? [],
       );
     for (const creator of extraElementEditorStateCreators) {
       const elementEditorState = creator(this, element);
@@ -852,9 +944,10 @@ export class EditorStore {
     if (this.graphState.checkIfApplicationUpdateOperationIsRunning()) {
       return;
     }
-    const generatedChildrenElements = this.graphState.graph.generationModel.allElements.filter(
-      (e) => e.generationParentElement === element,
-    );
+    const generatedChildrenElements =
+      this.graphState.graph.generationModel.allElements.filter(
+        (e) => e.generationParentElement === element,
+      );
     const elementsToDelete = [element, ...generatedChildrenElements];
     if (
       this.currentEditorState &&
@@ -930,24 +1023,22 @@ export class EditorStore {
     this.setCurrentEditorState(generatedFileState);
   }
 
-  createGlobalHotKeyAction = (
-    handler: () => void,
-  ): ((event: KeyboardEvent | undefined) => void) => (
-    event: KeyboardEvent | undefined,
-  ): void => {
-    event?.preventDefault();
-    // FIXME: maybe we should come up with a better way to block global hot keys, this seems highly restrictive.
-    const isResolvingConflicts =
-      this.isInConflictResolutionMode &&
-      !this.conflictResolutionState.hasResolvedAllConflicts;
-    if (
-      this.isInitialized &&
-      !isResolvingConflicts &&
-      !this.blockGlobalHotkeys
-    ) {
-      handler();
-    }
-  };
+  createGlobalHotKeyAction =
+    (handler: () => void): ((event: KeyboardEvent | undefined) => void) =>
+    (event: KeyboardEvent | undefined): void => {
+      event?.preventDefault();
+      // FIXME: maybe we should come up with a better way to block global hot keys, this seems highly restrictive.
+      const isResolvingConflicts =
+        this.isInConflictResolutionMode &&
+        !this.conflictResolutionState.hasResolvedAllConflicts;
+      if (
+        this.isInitialized &&
+        !isResolvingConflicts &&
+        !this.blockGlobalHotkeys
+      ) {
+        handler();
+      }
+    };
 
   closeAllEditorTabs(): void {
     this.setCurrentEditorState(undefined);
@@ -964,9 +1055,10 @@ export class EditorStore {
         showLoading: true,
       });
       try {
-        const graphGrammar = (yield this.graphState.graphManager.graphToPureCode(
-          this.graphState.graph,
-        )) as string;
+        const graphGrammar =
+          (yield this.graphState.graphManager.graphToPureCode(
+            this.graphState.graph,
+          )) as string;
         yield this.grammarTextEditorState.setGraphGrammarText(graphGrammar);
       } catch (error: unknown) {
         assertErrorThrown(error);
@@ -1075,41 +1167,46 @@ export class EditorStore {
   }
 
   getSupportedElementTypes(): string[] {
-    return ([
-      /* @MARKER: NEW ELEMENT TYPE SUPPORT --- consider adding new element type handler here whenever support for a new element type is added to the app */
-      PACKAGEABLE_ELEMENT_TYPE.CLASS,
-      PACKAGEABLE_ELEMENT_TYPE.ENUMERATION,
-      PACKAGEABLE_ELEMENT_TYPE.PROFILE,
-      PACKAGEABLE_ELEMENT_TYPE.ASSOCIATION,
-      PACKAGEABLE_ELEMENT_TYPE.FUNCTION,
-      PACKAGEABLE_ELEMENT_TYPE.DIAGRAM,
-      PACKAGEABLE_ELEMENT_TYPE.MEASURE,
-      PACKAGEABLE_ELEMENT_TYPE.MAPPING,
-      PACKAGEABLE_ELEMENT_TYPE.RUNTIME,
-      PACKAGEABLE_ELEMENT_TYPE.CONNECTION,
-      PACKAGEABLE_ELEMENT_TYPE.SERVICE,
-      PACKAGEABLE_ELEMENT_TYPE.GENERATION_SPECIFICATION,
-      PACKAGEABLE_ELEMENT_TYPE.FILE_GENERATION,
-      PACKAGEABLE_ELEMENT_TYPE.FLAT_DATA_STORE,
-      PACKAGEABLE_ELEMENT_TYPE.DATABASE,
-    ] as string[])
+    return (
+      [
+        /* @MARKER: NEW ELEMENT TYPE SUPPORT --- consider adding new element type handler here whenever support for a new element type is added to the app */
+        PACKAGEABLE_ELEMENT_TYPE.CLASS,
+        PACKAGEABLE_ELEMENT_TYPE.ENUMERATION,
+        PACKAGEABLE_ELEMENT_TYPE.PROFILE,
+        PACKAGEABLE_ELEMENT_TYPE.ASSOCIATION,
+        PACKAGEABLE_ELEMENT_TYPE.FUNCTION,
+        PACKAGEABLE_ELEMENT_TYPE.DIAGRAM,
+        PACKAGEABLE_ELEMENT_TYPE.MEASURE,
+        PACKAGEABLE_ELEMENT_TYPE.MAPPING,
+        PACKAGEABLE_ELEMENT_TYPE.RUNTIME,
+        PACKAGEABLE_ELEMENT_TYPE.CONNECTION,
+        PACKAGEABLE_ELEMENT_TYPE.SERVICE,
+        PACKAGEABLE_ELEMENT_TYPE.GENERATION_SPECIFICATION,
+        PACKAGEABLE_ELEMENT_TYPE.FILE_GENERATION,
+        PACKAGEABLE_ELEMENT_TYPE.FLAT_DATA_STORE,
+        PACKAGEABLE_ELEMENT_TYPE.DATABASE,
+      ] as string[]
+    )
       .concat(
         this.applicationStore.pluginManager
           .getEditorPlugins()
           .flatMap(
             (plugin) =>
-              (plugin as DSL_EditorPlugin_Extension).getExtraSupportedElementTypes?.() ??
-              [],
+              (
+                plugin as DSL_EditorPlugin_Extension
+              ).getExtraSupportedElementTypes?.() ?? [],
           ),
       )
       .filter(
         (type) =>
           !this.applicationStore.config.options
             .TEMPORARY__disableNonModelStoreSupports ||
-          !([
-            PACKAGEABLE_ELEMENT_TYPE.FLAT_DATA_STORE,
-            PACKAGEABLE_ELEMENT_TYPE.DATABASE,
-          ] as string[]).includes(type),
+          !(
+            [
+              PACKAGEABLE_ELEMENT_TYPE.FLAT_DATA_STORE,
+              PACKAGEABLE_ELEMENT_TYPE.DATABASE,
+            ] as string[]
+          ).includes(type),
       );
   }
 }

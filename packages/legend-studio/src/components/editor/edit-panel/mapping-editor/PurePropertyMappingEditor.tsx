@@ -49,9 +49,8 @@ export const getDerivedPropertyArgumentStrings = (
   editorStore: EditorStore,
   derivedProperty: DerivedProperty,
 ): string => {
-  const variables = (Array.isArray(derivedProperty.parameters)
-    ? derivedProperty.parameters
-    : []
+  const variables = (
+    Array.isArray(derivedProperty.parameters) ? derivedProperty.parameters : []
   )
     .map((parameter) =>
       editorStore.graphState.graphManager.buildValueSpecificationFromJson(
@@ -86,9 +85,8 @@ const SimplePropertyMappingEditor = observer(
   }) => {
     const { propertyMappingState, transformProps, drop, dragItem } = props;
     const editorStore = useEditorStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const propertyMapping = propertyMappingState.propertyMapping;
     const expectedType =
       propertyMapping.property.value.genericType.value.rawType;
@@ -122,6 +120,7 @@ const EnumerationPropertyMappingEditor = observer(
     propertyMappingState: PurePropertyMappingState;
     drop?: ConnectDropTarget;
     dragItem?: TransformDropTarget;
+    dragItemType: string;
     transformProps: {
       disableTransform: boolean;
       forceBackdrop: boolean;
@@ -132,17 +131,16 @@ const EnumerationPropertyMappingEditor = observer(
       propertyMappingState,
       drop,
       dragItem,
+      dragItemType,
       transformProps,
       isReadOnly,
     } = props;
     const editorStore = useEditorStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const propertyMapping = propertyMappingState.propertyMapping;
-    const enumeration = propertyMapping.property.value.genericType.value.getRawType(
-      Enumeration,
-    );
+    const enumeration =
+      propertyMapping.property.value.genericType.value.getRawType(Enumeration);
     const expectedType = propertyMapping.transformer
       ? propertyMapping.transformer.sourceType.value
       : enumeration;
@@ -186,7 +184,7 @@ const EnumerationPropertyMappingEditor = observer(
     const canDrop =
       dragItem &&
       ((dragItem.data.type && dragItem.data.type === expectedType) ||
-        (dragItem.type === CORE_DND_TYPE.TYPE_TREE_ENUM &&
+        (dragItemType === CORE_DND_TYPE.TYPE_TREE_ENUM &&
           dragItem.data.parent === expectedType));
 
     return (
@@ -240,9 +238,8 @@ const ClassPropertyMappingEditor = observer(
   }) => {
     const { propertyMappingState, drop, dragItem, transformProps } = props;
     const editorStore = useEditorStore();
-    const mappingEditorState = editorStore.getCurrentEditorState(
-      MappingEditorState,
-    );
+    const mappingEditorState =
+      editorStore.getCurrentEditorState(MappingEditorState);
     const propertyMapping = propertyMappingState.propertyMapping;
     const isDefaultId = propertyMapping.targetSetImplementation?.id.isDefault;
     const target = propertyMapping.targetSetImplementation ? (
@@ -284,7 +281,8 @@ const ClassPropertyMappingEditor = observer(
           <div className="property-mapping-editor__entry__id">
             <div
               className={clsx('property-mapping-editor__entry__id__label', {
-                'property-mapping-editor__entry__id__label--default': isDefaultId,
+                'property-mapping-editor__entry__id__label--default':
+                  isDefaultId,
               })}
             >
               {target}
@@ -331,12 +329,12 @@ export const PurePropertyMappingEditor = observer(
       isReadOnly;
     // DnD
     const handleDrop = useCallback(
-      (dropItem: TransformDropTarget): void => {
+      (dropItem: TransformDropTarget, dropType: string): void => {
         if (!disableEditingTransform) {
           if (dropItem instanceof TypeDragSource) {
             // if the dragged node is enum, when dropped, we want to have it as a constant
             let toAppend = '';
-            if (dropItem.type === CORE_DND_TYPE.TYPE_TREE_ENUM) {
+            if (dropType === CORE_DND_TYPE.TYPE_TREE_ENUM) {
               toAppend = `${dropItem.data.parent.path}.${dropItem.data.label}`;
             } else {
               toAppend = dropItem.data.id;
@@ -359,7 +357,7 @@ export const PurePropertyMappingEditor = observer(
       },
       [disableEditingTransform, purePropertyMappingState],
     );
-    const [{ item }, drop] = useDrop(
+    const [{ item, dragItemType }, drop] = useDrop(
       () => ({
         accept: [
           CORE_DND_TYPE.TYPE_TREE_CLASS,
@@ -367,9 +365,11 @@ export const PurePropertyMappingEditor = observer(
           CORE_DND_TYPE.TYPE_TREE_PRIMITIVE,
           CORE_DND_TYPE.TYPE_TREE_ENUM,
         ],
-        drop: (dropItem: TransformDropTarget): void => handleDrop(dropItem),
-        collect: (monitor): { item: unknown } => ({
+        drop: (dropItem: TransformDropTarget, monitor): void =>
+          handleDrop(dropItem, monitor.getItemType() as string),
+        collect: (monitor): { item: unknown; dragItemType: string } => ({
           item: monitor.getItem(),
+          dragItemType: monitor.getItemType() as string,
         }),
       }),
       [handleDrop],
@@ -403,6 +403,7 @@ export const PurePropertyMappingEditor = observer(
             propertyMappingState={purePropertyMappingState}
             drop={drop}
             dragItem={dragItem}
+            dragItemType={dragItemType}
             transformProps={transformProps}
             isReadOnly={isReadOnly}
           />

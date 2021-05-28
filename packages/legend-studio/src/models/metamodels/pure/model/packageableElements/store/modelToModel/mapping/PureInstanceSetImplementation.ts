@@ -35,9 +35,10 @@ import type { InferableMappingElementRoot } from '../../../../../model/packageab
 
 export class PureInstanceSetImplementation
   extends InstanceSetImplementation
-  implements Hashable, Stubable {
+  implements Hashable, Stubable
+{
   srcClass: OptionalPackageableElementReference<Class>;
-  filter?: RawLambda;
+  filter?: RawLambda; // @MARKER GENERATED MODEL DISCREPANCY --- Studio does not process lambda
   declare propertyMappings: PurePropertyMapping[];
 
   constructor(

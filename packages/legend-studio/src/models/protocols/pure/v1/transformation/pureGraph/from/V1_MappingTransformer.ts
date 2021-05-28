@@ -35,10 +35,11 @@ import type { InputData } from '../../../../../../metamodels/pure/model/packagea
 import type { MappingTestAssert } from '../../../../../../metamodels/pure/model/packageableElements/mapping/MappingTestAssert';
 import {
   ObjectInputData,
-  OBJECT_INPUT_TYPE,
+  ObjectInputType,
 } from '../../../../../../metamodels/pure/model/packageableElements/store/modelToModel/mapping/ObjectInputData';
 import { FlatDataInputData } from '../../../../../../metamodels/pure/model/packageableElements/store/flatData/mapping/FlatDataInputData';
 import { ExpectedOutputMappingTestAssert } from '../../../../../../metamodels/pure/model/packageableElements/mapping/ExpectedOutputMappingTestAssert';
+import { extractLine } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/model/RelationalOperationElement';
 import type { FlatDataPropertyMapping } from '../../../../../../metamodels/pure/model/packageableElements/store/flatData/mapping/FlatDataPropertyMapping';
 import type { EmbeddedFlatDataPropertyMapping } from '../../../../../../metamodels/pure/model/packageableElements/store/flatData/mapping/EmbeddedFlatDataPropertyMapping';
 import type { PureInstanceSetImplementation } from '../../../../../../metamodels/pure/model/packageableElements/store/modelToModel/mapping/PureInstanceSetImplementation';
@@ -128,12 +129,21 @@ import { XStoreAssociationImplementation } from '../../../../../../metamodels/pu
 import { V1_XStoreAssociationMapping } from '../../../model/packageableElements/mapping/xStore/V1_XStoreAssociationMapping';
 import { V1_LocalMappingPropertyInfo } from '../../../model/packageableElements/mapping/V1_LocalMappingPropertyInfo';
 import type { LocalMappingPropertyInfo } from '../../../../../../metamodels/pure/model/packageableElements/mapping/LocalMappingPropertyInfo';
+import { V1_FilterMapping } from '../../../model/packageableElements/store/relational/mapping/V1_FilterMapping';
+import { V1_FilterPointer } from '../../../model/packageableElements/store/relational/mapping/V1_FilterPointer';
+import { V1_JoinPointer } from '../../../model/packageableElements/store/relational/model/V1_JoinPointer';
+import type { V1_RawRelationalOperationElement } from '../../../model/packageableElements/store/relational/model/V1_RawRelationalOperationElement';
+import { RelationalInputData } from '../../../../../../metamodels/pure/model/packageableElements/store/relational/mapping/RelationalInputData';
+import { V1_RelationalInputData } from '../../../model/packageableElements/store/relational/mapping/V1_RelationalInputData';
 
 export const V1_transformPropertyReference = (
   element: PropertyReference,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_PropertyPointer => {
   const property = new V1_PropertyPointer();
-  property.class = V1_transformElementReference(element.ownerReference);
+  property.class = isTransformingEmbeddedPropertyMapping
+    ? undefined
+    : V1_transformElementReference(element.ownerReference);
   property.property = element.value.name;
   return property;
 };
@@ -200,9 +210,9 @@ const transformEnumerationMapping = (
 
 export const V1_getObjectInputType = (type: string): V1_ObjectInputType => {
   switch (type) {
-    case OBJECT_INPUT_TYPE.JSON:
+    case ObjectInputType.JSON:
       return V1_ObjectInputType.JSON;
-    case OBJECT_INPUT_TYPE.XML:
+    case ObjectInputType.XML:
       return V1_ObjectInputType.XML;
     default:
       throw new UnsupportedOperationError(
@@ -233,6 +243,16 @@ const transformFlatDataInputData = (
   return inputData;
 };
 
+const transformRelationalInputData = (
+  element: RelationalInputData,
+): V1_RelationalInputData => {
+  const inputData = new V1_RelationalInputData();
+  inputData.data = element.data;
+  inputData.inputType = element.inputType;
+  inputData.database = V1_transformElementReference(element.database);
+  return inputData;
+};
+
 const transformExpectedOutputMappingTestAssert = (
   element: ExpectedOutputMappingTestAssert,
 ): V1_ExpectedOutputMappingTestAssert => {
@@ -246,6 +266,8 @@ const transformMappingTestInputData = (inputData: InputData): V1_InputData => {
     return transformObjectInputData(inputData);
   } else if (inputData instanceof FlatDataInputData) {
     return transformFlatDataInputData(inputData);
+  } else if (inputData instanceof RelationalInputData) {
+    return transformRelationalInputData(inputData);
   }
   throw new UnsupportedOperationError(
     `Can't serialize mapping test input data of type '${
@@ -307,20 +329,25 @@ const transformPropertyMappingSource = (value: SetImplementation): string =>
 const transformPropertyMappingTarget = (
   value: SetImplementation | undefined,
 ): string | undefined => value?.id.value;
-const classMappingPropertyMappingsSerializer = (
+const transformClassMappingPropertyMappings = (
   values: PropertyMapping[],
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_PropertyMapping[] =>
-  values.filter((value) => !value.isStub).map(serializeProperyMapping);
+  values
+    .filter((value) => !value.isStub)
+    .map((value) =>
+      serializeProperyMapping(value, isTransformingEmbeddedPropertyMapping),
+    );
 
 const transformSimpleFlatDataPropertyMapping = (
   element: FlatDataPropertyMapping,
 ): V1_FlatDataPropertyMapping => {
   const flatDataPropertyMapping = new V1_FlatDataPropertyMapping();
-  flatDataPropertyMapping.enumMappingId = transformOptionalPropertyMappingTransformer(
-    element.transformer,
-  );
+  flatDataPropertyMapping.enumMappingId =
+    transformOptionalPropertyMappingTransformer(element.transformer);
   flatDataPropertyMapping.property = V1_transformPropertyReference(
     element.property,
+    false,
   );
   flatDataPropertyMapping.source = transformPropertyMappingSource(
     element.sourceSetImplementation,
@@ -329,9 +356,10 @@ const transformSimpleFlatDataPropertyMapping = (
     element.targetSetImplementation,
   );
   if (!element.transform.isStub) {
-    flatDataPropertyMapping.transform = element.transform.accept_ValueSpecificationVisitor(
-      new V1_RawValueSpecificationTransformer(),
-    ) as V1_RawLambda;
+    flatDataPropertyMapping.transform =
+      element.transform.accept_ValueSpecificationVisitor(
+        new V1_RawValueSpecificationTransformer(),
+      ) as V1_RawLambda;
   }
   return flatDataPropertyMapping;
 };
@@ -345,9 +373,13 @@ const transformEmbeddedFlatDataPropertyMapping = (
     embedded.id = id;
   }
   embedded.class = V1_transformElementReference(element.class);
-  embedded.property = V1_transformPropertyReference(element.property);
-  embedded.propertyMappings = classMappingPropertyMappingsSerializer(
+  embedded.property = V1_transformPropertyReference(
+    element.property,
+    false, // TODO: we might ned to turn this on in the future once we start working on the gramar roundtrip for flat-data
+  );
+  embedded.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    false, // TODO: we might ned to turn this on in the future once we start working on the gramar roundtrip for flat-data
   );
   embedded.root = false;
   embedded.source = transformPropertyMappingSource(
@@ -363,22 +395,21 @@ const transformPurePropertyMapping = (
   element: PurePropertyMapping,
 ): V1_PurePropertyMapping => {
   const purePropertyMapping = new V1_PurePropertyMapping();
-  purePropertyMapping.enumMappingId = transformOptionalPropertyMappingTransformer(
-    element.transformer,
-  );
+  purePropertyMapping.enumMappingId =
+    transformOptionalPropertyMappingTransformer(element.transformer);
   purePropertyMapping.property = V1_transformPropertyReference(
     element.property,
+    false,
   );
-  purePropertyMapping.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
-  );
+  purePropertyMapping.source = ''; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   purePropertyMapping.target = transformPropertyMappingTarget(
     element.targetSetImplementation,
   );
   if (!element.transform.isStub) {
-    purePropertyMapping.transform = element.transform.accept_ValueSpecificationVisitor(
-      new V1_RawValueSpecificationTransformer(),
-    ) as V1_RawLambda;
+    purePropertyMapping.transform =
+      element.transform.accept_ValueSpecificationVisitor(
+        new V1_RawValueSpecificationTransformer(),
+      ) as V1_RawLambda;
   }
   if (element.localMappingProperty) {
     purePropertyMapping.localMappingProperty = transformLocalPropertyInfo(
@@ -391,18 +422,19 @@ const transformPurePropertyMapping = (
 
 const transformRelationalPropertyMapping = (
   element: RelationalPropertyMapping,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_RelationalPropertyMapping => {
   const propertyMapping = new V1_RelationalPropertyMapping();
   propertyMapping.enumMappingId = transformOptionalPropertyMappingTransformer(
     element.transformer,
   );
-  propertyMapping.property = V1_transformPropertyReference(element.property);
-  propertyMapping.relationalOperation = V1_transformRelationalOperationElement(
-    element.relationalOperation,
+  propertyMapping.property = V1_transformPropertyReference(
+    element.property,
+    isTransformingEmbeddedPropertyMapping,
   );
-  propertyMapping.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
-  );
+  propertyMapping.relationalOperation =
+    element.relationalOperation as V1_RawRelationalOperationElement;
+  propertyMapping.source = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   propertyMapping.target = transformPropertyMappingTarget(
     element.targetSetImplementation,
   );
@@ -416,12 +448,14 @@ const transformRelationalPropertyMapping = (
 
 const transformEmbeddedRelationalPropertyMapping = (
   element: EmbeddedRelationalInstanceSetImplementation,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_EmbeddedRelationalPropertyMapping => {
   const embedded = new V1_EmbeddedRelationalPropertyMapping();
-  embedded.property = V1_transformPropertyReference(element.property);
-  embedded.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
+  embedded.property = V1_transformPropertyReference(
+    element.property,
+    isTransformingEmbeddedPropertyMapping,
   );
+  embedded.source = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   embedded.target = transformPropertyMappingTarget(
     element.targetSetImplementation,
   );
@@ -429,14 +463,15 @@ const transformEmbeddedRelationalPropertyMapping = (
   classMapping.primaryKey = element.primaryKey.map(
     V1_transformRelationalOperationElement,
   );
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    true,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
     classMapping.root = root;
   }
-  classMapping.class = V1_transformElementReference(element.class);
+  classMapping.class = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   embedded.classMapping = classMapping;
   if (element.localMappingProperty) {
     embedded.localMappingProperty = transformLocalPropertyInfo(
@@ -448,12 +483,14 @@ const transformEmbeddedRelationalPropertyMapping = (
 
 const transformInlineEmbeddedRelationalPropertyMapping = (
   element: InlineEmbeddedRelationalInstanceSetImplementation,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_InlineEmbeddedPropertyMapping => {
   const embedded = new V1_InlineEmbeddedPropertyMapping();
-  embedded.property = V1_transformPropertyReference(element.property);
-  embedded.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
+  embedded.property = V1_transformPropertyReference(
+    element.property,
+    isTransformingEmbeddedPropertyMapping,
   );
+  embedded.source = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   embedded.target = transformPropertyMappingTarget(
     element.targetSetImplementation,
   );
@@ -470,38 +507,16 @@ const transformInlineEmbeddedRelationalPropertyMapping = (
   return embedded;
 };
 
-const transformXStorePropertyMapping = (
-  element: XStorePropertyMapping,
-): V1_XStorePropertyMapping => {
-  const xstore = new V1_XStorePropertyMapping();
-  xstore.property = V1_transformPropertyReference(element.property);
-  xstore.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
-  );
-  xstore.target = transformPropertyMappingTarget(
-    element.targetSetImplementation,
-  );
-  if (!element.crossExpression.isStub) {
-    xstore.crossExpression = element.crossExpression.accept_ValueSpecificationVisitor(
-      new V1_RawValueSpecificationTransformer(),
-    ) as V1_RawLambda;
-  }
-  if (element.localMappingProperty) {
-    xstore.localMappingProperty = transformLocalPropertyInfo(
-      element.localMappingProperty,
-    );
-  }
-  return xstore;
-};
-
 const transformOtherwiseEmbeddedRelationalPropertyMapping = (
   element: OtherwiseEmbeddedRelationalInstanceSetImplementation,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_OtherwiseEmbeddedRelationalPropertyMapping => {
   const embedded = new V1_OtherwiseEmbeddedRelationalPropertyMapping();
-  embedded.property = V1_transformPropertyReference(element.property);
-  embedded.source = transformPropertyMappingSource(
-    element.sourceSetImplementation,
+  embedded.property = V1_transformPropertyReference(
+    element.property,
+    isTransformingEmbeddedPropertyMapping,
   );
+  embedded.source = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   embedded.target = transformPropertyMappingTarget(
     element.targetSetImplementation,
   );
@@ -509,17 +524,19 @@ const transformOtherwiseEmbeddedRelationalPropertyMapping = (
   classMapping.primaryKey = element.primaryKey.map(
     V1_transformRelationalOperationElement,
   );
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    true,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
     classMapping.root = root;
   }
-  classMapping.class = V1_transformElementReference(element.class);
+  classMapping.class = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   embedded.classMapping = classMapping;
   embedded.otherwisePropertyMapping = serializeProperyMapping(
     element.otherwisePropertyMapping,
+    true,
   ) as V1_RelationalPropertyMapping;
   if (element.localMappingProperty) {
     embedded.localMappingProperty = transformLocalPropertyInfo(
@@ -529,11 +546,39 @@ const transformOtherwiseEmbeddedRelationalPropertyMapping = (
   return embedded;
 };
 
+const transformXStorePropertyMapping = (
+  element: XStorePropertyMapping,
+): V1_XStorePropertyMapping => {
+  const xstore = new V1_XStorePropertyMapping();
+  xstore.property = V1_transformPropertyReference(element.property, false);
+  xstore.source = transformPropertyMappingSource(
+    element.sourceSetImplementation,
+  );
+  xstore.target = transformPropertyMappingTarget(
+    element.targetSetImplementation,
+  );
+  if (!element.crossExpression.isStub) {
+    xstore.crossExpression =
+      element.crossExpression.accept_ValueSpecificationVisitor(
+        new V1_RawValueSpecificationTransformer(),
+      ) as V1_RawLambda;
+  }
+  if (element.localMappingProperty) {
+    xstore.localMappingProperty = transformLocalPropertyInfo(
+      element.localMappingProperty,
+    );
+  }
+  return xstore;
+};
+
 const transformAggregationAwarePropertyMapping = (
   element: AggregationAwarePropertyMapping,
 ): V1_AggregationAwarePropertyMapping => {
   const propertyMapping = new V1_AggregationAwarePropertyMapping();
-  propertyMapping.property = V1_transformPropertyReference(element.property);
+  propertyMapping.property = V1_transformPropertyReference(
+    element.property,
+    false,
+  );
   propertyMapping.source = transformPropertyMappingSource(
     element.sourceSetImplementation,
   );
@@ -548,8 +593,16 @@ const transformAggregationAwarePropertyMapping = (
   return propertyMapping;
 };
 
-class PropertyMappingSerializer
-  implements PropertyMappingVisitor<V1_PropertyMapping> {
+class PropertyMappingTransformer
+  implements PropertyMappingVisitor<V1_PropertyMapping>
+{
+  isTransformingEmbeddedPropertyMapping = false;
+
+  constructor(isTransformingEmbeddedPropertyMapping: boolean) {
+    this.isTransformingEmbeddedPropertyMapping =
+      isTransformingEmbeddedPropertyMapping;
+  }
+
   visit_PurePropertyMapping(
     propertyMapping: PurePropertyMapping,
   ): V1_PurePropertyMapping {
@@ -568,22 +621,34 @@ class PropertyMappingSerializer
   visit_RelationalPropertyMapping(
     propertyMapping: RelationalPropertyMapping,
   ): V1_PropertyMapping {
-    return transformRelationalPropertyMapping(propertyMapping);
+    return transformRelationalPropertyMapping(
+      propertyMapping,
+      this.isTransformingEmbeddedPropertyMapping,
+    );
   }
   visit_EmbeddedRelationalPropertyMapping(
     propertyMapping: EmbeddedRelationalInstanceSetImplementation,
   ): V1_PropertyMapping {
-    return transformEmbeddedRelationalPropertyMapping(propertyMapping);
+    return transformEmbeddedRelationalPropertyMapping(
+      propertyMapping,
+      this.isTransformingEmbeddedPropertyMapping,
+    );
   }
   visit_InlineEmbeddedRelationalPropertyMapping(
     propertyMapping: InlineEmbeddedRelationalInstanceSetImplementation,
   ): V1_PropertyMapping {
-    return transformInlineEmbeddedRelationalPropertyMapping(propertyMapping);
+    return transformInlineEmbeddedRelationalPropertyMapping(
+      propertyMapping,
+      this.isTransformingEmbeddedPropertyMapping,
+    );
   }
   visit_OtherwiseEmbeddedRelationalPropertyMapping(
     propertyMapping: OtherwiseEmbeddedRelationalInstanceSetImplementation,
   ): V1_PropertyMapping {
-    return transformOtherwiseEmbeddedRelationalPropertyMapping(propertyMapping);
+    return transformOtherwiseEmbeddedRelationalPropertyMapping(
+      propertyMapping,
+      this.isTransformingEmbeddedPropertyMapping,
+    );
   }
   visit_XStorePropertyMapping(
     propertyMapping: XStorePropertyMapping,
@@ -638,8 +703,9 @@ const transformPureInstanceSetImplementation = (
     ) as V1_RawLambda;
   }
   classMapping.id = mappingElementIdSerializer(element.id);
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    true,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
@@ -664,8 +730,9 @@ const transformFlatDataInstanceSetImpl = (
   classMapping.flatData =
     element.sourceRootRecordType.ownerReference.valueForSerialization;
   classMapping.id = mappingElementIdSerializer(element.id);
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    true,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
@@ -688,8 +755,29 @@ const transformRootRelationalSetImpl = (
   classMapping.primaryKey = element.primaryKey.map(
     V1_transformRelationalOperationElement,
   );
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  if (element.filter) {
+    const filter = new V1_FilterMapping();
+
+    const filterPointer = new V1_FilterPointer();
+    filterPointer.db = element.filter.database.path;
+    filterPointer.name = element.filter.filterName;
+    filter.filter = filterPointer;
+
+    filter.joins = element.filter.joinTreeNode
+      ? extractLine(element.filter.joinTreeNode).map((node) => {
+          const joinPtr = new V1_JoinPointer();
+          joinPtr.db = node.join.ownerReference.valueForSerialization;
+          joinPtr.joinType = node.joinType;
+          joinPtr.name = node.join.value.name;
+          return joinPtr;
+        })
+      : [];
+
+    classMapping.filter = filter;
+  }
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    false,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
@@ -698,21 +786,22 @@ const transformRootRelationalSetImpl = (
   return classMapping;
 };
 
-const transsformRelationalInstanceSetImpl = (
+const transformRelationalInstanceSetImpl = (
   element: RelationalInstanceSetImplementation,
 ): V1_RelationalClassMapping => {
   const classMapping = new V1_RelationalClassMapping();
   classMapping.primaryKey = element.primaryKey.map(
     V1_transformRelationalOperationElement,
   );
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    true,
   );
   const root = transformMappingElementRoot(element.root);
   if (root !== undefined) {
     classMapping.root = root;
   }
-  classMapping.class = V1_transformElementReference(element.class);
+  classMapping.class = undefined; // @MARKER: GRAMMAR ROUNDTRIP --- omit this information during protocol transformation as it can be interpreted while building the graph
   return classMapping;
 };
 
@@ -791,26 +880,28 @@ const transformAggregationAwareSetImplementation = (
   if (mainSetImplementation) {
     classMapping.mainSetImplementation = mainSetImplementation;
   }
-  classMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  classMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    false,
   );
-  classMapping.aggregateSetImplementations = element.aggregateSetImplementations.map(
-    transformAggSetImplContainer,
-  );
+  classMapping.aggregateSetImplementations =
+    element.aggregateSetImplementations.map(transformAggSetImplContainer);
   return classMapping;
 };
 
 // NOTE: this needs to be a function to avoid error with using before declaration for embedded property mappings due to the hoisting behavior in ES
 function serializeProperyMapping(
   propertyMapping: PropertyMapping,
+  isTransformingEmbeddedPropertyMapping: boolean,
 ): V1_PropertyMapping {
   return propertyMapping.accept_PropertyMappingVisitor(
-    new PropertyMappingSerializer(),
+    new PropertyMappingTransformer(isTransformingEmbeddedPropertyMapping),
   );
 }
 
-export class V1_SetImplementationSerializer
-  implements SetImplementationVisitor<V1_ClassMapping | undefined> {
+export class V1_SetImplementationTransformer
+  implements SetImplementationVisitor<V1_ClassMapping | undefined>
+{
   visit_OperationSetImplementation(
     setImplementation: OperationSetImplementation,
   ): V1_ClassMapping | undefined {
@@ -841,7 +932,7 @@ export class V1_SetImplementationSerializer
   visit_RelationalInstanceSetImplementation(
     setImplementation: RelationalInstanceSetImplementation,
   ): V1_ClassMapping | undefined {
-    return transsformRelationalInstanceSetImpl(setImplementation);
+    return transformRelationalInstanceSetImpl(setImplementation);
   }
   visit_AggregationAwareSetImplementation(
     setImplementation: AggregationAwareSetImplementation,
@@ -854,7 +945,7 @@ function transformSetImplementation(
   setImplementation: SetImplementation,
 ): V1_ClassMapping | undefined {
   return setImplementation.accept_SetImplementationVisitor(
-    new V1_SetImplementationSerializer(),
+    new V1_SetImplementationTransformer(),
   );
 }
 
@@ -867,8 +958,9 @@ const transformRelationalAssociationImplementation = (
   relationalMapping.association = V1_transformElementReference(
     element.association,
   );
-  relationalMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  relationalMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    false,
   );
   relationalMapping.id = mappingElementIdSerializer(element.id);
   return relationalMapping;
@@ -880,8 +972,9 @@ const transformXStorelAssociationImplementation = (
   const xStoreMapping = new V1_XStoreAssociationMapping();
   xStoreMapping.stores = element.stores.map(V1_transformElementReference);
   xStoreMapping.association = V1_transformElementReference(element.association);
-  xStoreMapping.propertyMappings = classMappingPropertyMappingsSerializer(
+  xStoreMapping.propertyMappings = transformClassMappingPropertyMappings(
     element.propertyMappings,
+    false,
   );
   xStoreMapping.id = mappingElementIdSerializer(element.id);
   return xStoreMapping;

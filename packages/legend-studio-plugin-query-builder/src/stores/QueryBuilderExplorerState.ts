@@ -50,13 +50,12 @@ export enum QUERY_BUILDER_EXPLORER_TREE_DND_TYPE {
 }
 
 export interface QueryBuilderExplorerTreeDragSource {
-  type: QUERY_BUILDER_EXPLORER_TREE_DND_TYPE; // needed for `react-dnd`
   node: QueryBuilderExplorerTreePropertyNodeData;
 }
 
 export abstract class QueryBuilderExplorerTreeNodeData implements TreeNodeData {
-  isSelected?: boolean | undefined;
-  isOpen?: boolean | undefined;
+  isSelected?: boolean;
+  isOpen?: boolean;
   id: string;
   label: string;
   childrenIds: string[] = [];
@@ -102,15 +101,15 @@ export class QueryBuilderExplorerTreePropertyNodeData extends QueryBuilderExplor
 export const getPropertyExpression = (
   treeData: TreeData<QueryBuilderExplorerTreeNodeData>,
   node: QueryBuilderExplorerTreePropertyNodeData,
-  multiplicity_ONE: Multiplicity,
+  multiplicityOne: Multiplicity,
 ): AbstractPropertyExpression => {
   const projectionColumnLambdaVariable = new VariableExpression(
     DEFAULT_LAMBDA_VARIABLE_NAME,
-    multiplicity_ONE,
+    multiplicityOne,
   );
   const propertyExpression = new AbstractPropertyExpression(
     '',
-    multiplicity_ONE,
+    multiplicityOne,
   );
   propertyExpression.func = guaranteeNonNullable(node.property);
   let currentExpression = propertyExpression;
@@ -118,7 +117,7 @@ export const getPropertyExpression = (
   while (parentNode instanceof QueryBuilderExplorerTreePropertyNodeData) {
     const parentPropertyExpression = new AbstractPropertyExpression(
       '',
-      multiplicity_ONE,
+      multiplicityOne,
     );
     parentPropertyExpression.func = guaranteeNonNullable(parentNode.property);
     currentExpression.parametersValues.push(parentPropertyExpression);
@@ -133,7 +132,7 @@ const resolveSetImplementationForPropertyMapping = (
   propertyMapping: PropertyMapping,
 ): SetImplementation | undefined => {
   if (propertyMapping.isEmbedded) {
-    return (propertyMapping as unknown) as SetImplementation;
+    return propertyMapping as unknown as SetImplementation;
   } else if (propertyMapping.targetSetImplementation) {
     return propertyMapping.targetSetImplementation;
   }
@@ -153,9 +152,10 @@ const getPropertyMappedData = (
   } else if (property instanceof Property) {
     const parentSetImplementation = parentNode.setImpl;
     if (parentSetImplementation) {
-      const propertyMappings = editorStore.graphState.getMappingElementPropertyMappings(
-        parentSetImplementation,
-      );
+      const propertyMappings =
+        editorStore.graphState.getMappingElementPropertyMappings(
+          parentSetImplementation,
+        );
       const mappedProperties = propertyMappings
         .filter((p) => !p.isStub)
         .map((p) => p.property.value.name);
@@ -171,9 +171,8 @@ const getPropertyMappedData = (
           if (propertyMapping) {
             return {
               mapped: true,
-              setImpl: resolveSetImplementationForPropertyMapping(
-                propertyMapping,
-              ),
+              setImpl:
+                resolveSetImplementationForPropertyMapping(propertyMapping),
             };
           }
         }

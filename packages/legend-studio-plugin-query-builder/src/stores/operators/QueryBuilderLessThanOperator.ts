@@ -33,7 +33,7 @@ import {
   buildPrimitiveInstanceValue,
   buildFilterConditionExpression,
   getDefaultPrimitiveInstanceValueForType,
-  getValueSpecificationTypeInfo,
+  getNonCollectionValueSpecificationType,
 } from './QueryBuilderOperatorHelpers';
 
 const LESS_THAN_FUNCTION_NAME = 'lessThan';
@@ -49,29 +49,32 @@ export class QueryBuilderLessThanOperator extends QueryBuilderOperator {
     const propertyType =
       filterConditionState.propertyEditorState.propertyExpression.func
         .genericType.value.rawType;
-    return (([
-      PRIMITIVE_TYPE.NUMBER,
-      PRIMITIVE_TYPE.INTEGER,
-      PRIMITIVE_TYPE.DECIMAL,
-      PRIMITIVE_TYPE.FLOAT,
-    ] as unknown) as string).includes(propertyType.path);
+    return (
+      [
+        PRIMITIVE_TYPE.NUMBER,
+        PRIMITIVE_TYPE.INTEGER,
+        PRIMITIVE_TYPE.DECIMAL,
+        PRIMITIVE_TYPE.FLOAT,
+      ] as unknown as string
+    ).includes(propertyType.path);
   }
 
   isCompatibleWithFilterConditionValue(
     filterConditionState: FilterConditionState,
   ): boolean {
-    const typeInfo = filterConditionState.value
-      ? getValueSpecificationTypeInfo(filterConditionState.value)
+    const type = filterConditionState.value
+      ? getNonCollectionValueSpecificationType(filterConditionState.value)
       : undefined;
     return (
-      typeInfo !== undefined &&
-      (([
-        PRIMITIVE_TYPE.NUMBER,
-        PRIMITIVE_TYPE.INTEGER,
-        PRIMITIVE_TYPE.DECIMAL,
-        PRIMITIVE_TYPE.FLOAT,
-      ] as unknown) as string).includes(typeInfo.type.path) &&
-      typeInfo.isCollection === false
+      type !== undefined &&
+      (
+        [
+          PRIMITIVE_TYPE.NUMBER,
+          PRIMITIVE_TYPE.INTEGER,
+          PRIMITIVE_TYPE.DECIMAL,
+          PRIMITIVE_TYPE.FLOAT,
+        ] as unknown as string
+      ).includes(type.path)
     );
   }
 

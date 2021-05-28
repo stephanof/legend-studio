@@ -42,7 +42,7 @@ import {
   buildPrimitiveInstanceValue,
   buildFilterConditionExpression,
   getDefaultPrimitiveInstanceValueForType,
-  getValueSpecificationTypeInfo,
+  getNonCollectionValueSpecificationType,
   unwrapNotExpression,
 } from './QueryBuilderOperatorHelpers';
 
@@ -60,15 +60,17 @@ export class QueryBuilderEqualOperator extends QueryBuilderOperator {
       filterConditionState.propertyEditorState.propertyExpression.func
         .genericType.value.rawType;
     return (
-      (([
-        PRIMITIVE_TYPE.STRING,
-        PRIMITIVE_TYPE.BOOLEAN,
-        PRIMITIVE_TYPE.NUMBER,
-        PRIMITIVE_TYPE.INTEGER,
-        PRIMITIVE_TYPE.DECIMAL,
-        PRIMITIVE_TYPE.FLOAT,
-        PRIMITIVE_TYPE.STRICTDATE,
-      ] as unknown) as string).includes(propertyType.path) ||
+      (
+        [
+          PRIMITIVE_TYPE.STRING,
+          PRIMITIVE_TYPE.BOOLEAN,
+          PRIMITIVE_TYPE.NUMBER,
+          PRIMITIVE_TYPE.INTEGER,
+          PRIMITIVE_TYPE.DECIMAL,
+          PRIMITIVE_TYPE.FLOAT,
+          PRIMITIVE_TYPE.STRICTDATE,
+        ] as unknown as string
+      ).includes(propertyType.path) ||
       // if the type is enumeration, make sure the enumeration has some value
       (propertyType instanceof Enumeration && propertyType.values.length > 0)
     );
@@ -80,22 +82,23 @@ export class QueryBuilderEqualOperator extends QueryBuilderOperator {
     const propertyType =
       filterConditionState.propertyEditorState.propertyExpression.func
         .genericType.value.rawType;
-    const typeInfo = filterConditionState.value
-      ? getValueSpecificationTypeInfo(filterConditionState.value)
+    const type = filterConditionState.value
+      ? getNonCollectionValueSpecificationType(filterConditionState.value)
       : undefined;
     return (
-      typeInfo !== undefined &&
-      ((([
-        PRIMITIVE_TYPE.STRING,
-        PRIMITIVE_TYPE.BOOLEAN,
-        PRIMITIVE_TYPE.NUMBER,
-        PRIMITIVE_TYPE.INTEGER,
-        PRIMITIVE_TYPE.DECIMAL,
-        PRIMITIVE_TYPE.FLOAT,
-        PRIMITIVE_TYPE.STRICTDATE,
-      ] as unknown) as string).includes(typeInfo.type.path) ||
-        typeInfo.type === propertyType) &&
-      typeInfo.isCollection === false
+      type !== undefined &&
+      ((
+        [
+          PRIMITIVE_TYPE.STRING,
+          PRIMITIVE_TYPE.BOOLEAN,
+          PRIMITIVE_TYPE.NUMBER,
+          PRIMITIVE_TYPE.INTEGER,
+          PRIMITIVE_TYPE.DECIMAL,
+          PRIMITIVE_TYPE.FLOAT,
+          PRIMITIVE_TYPE.STRICTDATE,
+        ] as unknown as string
+      ).includes(type.path) ||
+        type === propertyType)
     );
   }
 
@@ -122,9 +125,10 @@ export class QueryBuilderEqualOperator extends QueryBuilderOperator {
       default:
         if (propertyType instanceof Enumeration) {
           if (propertyType.values.length > 0) {
-            const multiplicityOne = filterConditionState.editorStore.graphState.graph.getTypicalMultiplicity(
-              TYPICAL_MULTIPLICITY_TYPE.ONE,
-            );
+            const multiplicityOne =
+              filterConditionState.editorStore.graphState.graph.getTypicalMultiplicity(
+                TYPICAL_MULTIPLICITY_TYPE.ONE,
+              );
             const enumValueInstanceValue = new EnumValueInstanceValue(
               GenericTypeExplicitReference.create(
                 new GenericType(propertyType),

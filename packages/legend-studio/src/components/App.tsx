@@ -164,7 +164,18 @@ export const AppRoot = observer(() => {
       )}
       {applicationStore.isSDLCAuthorized && (
         <Switch>
-          <Route exact={true} path={ROUTE_PATTERN.VIEW} component={Viewer} />
+          <Route
+            exact={true}
+            path={[
+              ROUTE_PATTERN.VIEW,
+              ROUTE_PATTERN.VIEW_BY_ENTITY,
+              ROUTE_PATTERN.VIEW_BY_REVISION,
+              ROUTE_PATTERN.VIEW_BY_VERSION,
+              ROUTE_PATTERN.VIEW_BY_REVISION_ENTITY,
+              ROUTE_PATTERN.VIEW_BY_VERSION_ENTITY,
+            ]}
+            component={Viewer}
+          />
           <Route exact={true} path={ROUTE_PATTERN.REVIEW} component={Review} />
           <Route
             exact={true}
@@ -196,7 +207,7 @@ export const AppRoot = observer(() => {
 export const AppConfigurationEditor = observer(
   (props: { config: ApplicationConfig }) => {
     const { config } = props;
-    const history = (useHistory() as unknown) as History<State>;
+    const history = useHistory() as unknown as History<State>;
     const sdlcServerOptions = config.sdlcServerOptions.map((option) => ({
       label: option.label,
       value: option,
@@ -253,7 +264,7 @@ export const AppConfigurationEditor = observer(
 export const App = observer(
   (props: { config: ApplicationConfig; pluginManager: PluginManager }) => {
     const { config, pluginManager } = props;
-    const history = (useHistory() as unknown) as History<State>;
+    const history = useHistory() as unknown as History<State>;
     const routeMatch = useRouteMatch<SDLCServerKeyRouteParams>(
       generateRoutePatternWithSDLCServerKey('/'),
     );

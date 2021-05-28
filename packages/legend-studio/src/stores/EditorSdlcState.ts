@@ -104,6 +104,7 @@ export class EditorSdlcState {
   fetchCurrentProject = flow(function* (
     this: EditorSdlcState,
     projectId: string,
+    options?: { suppressNotification?: boolean },
   ) {
     try {
       this.isFetchingProject = true;
@@ -115,7 +116,9 @@ export class EditorSdlcState {
         CORE_LOG_EVENT.SDLC_PROBLEM,
         error,
       );
-      this.editorStore.applicationStore.notifyError(error);
+      if (!options?.suppressNotification) {
+        this.editorStore.applicationStore.notifyError(error);
+      }
     } finally {
       this.isFetchingProject = false;
     }
@@ -125,12 +128,14 @@ export class EditorSdlcState {
     this: EditorSdlcState,
     projectId: string,
     workspaceId: string,
+    options?: { suppressNotification?: boolean },
   ) {
     try {
       this.currentWorkspace = Workspace.serialization.fromJson(
         yield this.sdlcClient.getWorkspace(projectId, workspaceId),
       );
-      const isInConflictResolutionMode = (yield this.checkIfCurrentWorkspaceIsInConflictResolutionMode()) as boolean;
+      const isInConflictResolutionMode =
+        (yield this.checkIfCurrentWorkspaceIsInConflictResolutionMode()) as boolean;
       if (isInConflictResolutionMode) {
         this.editorStore.setMode(EDITOR_MODE.CONFLICT_RESOLUTION);
         this.currentWorkspace.type = WORKSPACE_TYPE.CONFLICT_RESOLUTION;
@@ -141,18 +146,20 @@ export class EditorSdlcState {
         CORE_LOG_EVENT.SDLC_PROBLEM,
         error,
       );
-      this.editorStore.applicationStore.notifyError(error);
+      if (!options?.suppressNotification) {
+        this.editorStore.applicationStore.notifyError(error);
+      }
     }
   });
 
   fetchProjectVersions = flow(function* (this: EditorSdlcState) {
     try {
       this.isFetchingProjectVersions = true;
-      this.projectVersions = ((yield this.sdlcClient.getVersions(
-        this.currentProjectId,
-      )) as PlainObject<Version>[]).map((version) =>
-        Version.serialization.fromJson(version),
-      );
+      this.projectVersions = (
+        (yield this.sdlcClient.getVersions(
+          this.currentProjectId,
+        )) as PlainObject<Version>[]
+      ).map((version) => Version.serialization.fromJson(version));
     } catch (error: unknown) {
       this.editorStore.applicationStore.logger.error(
         CORE_LOG_EVENT.SDLC_PROBLEM,
@@ -289,11 +296,12 @@ export class EditorSdlcState {
 
   *buildWorkspaceBaseRevisionEntityHashesIndex(): GeneratorFn<void> {
     try {
-      const workspaceBaseEntities = (yield this.sdlcClient.getEntitiesByRevision(
-        this.currentProjectId,
-        this.currentWorkspaceId,
-        RevisionAlias.BASE,
-      )) as Entity[];
+      const workspaceBaseEntities =
+        (yield this.sdlcClient.getEntitiesByRevision(
+          this.currentProjectId,
+          this.currentWorkspaceId,
+          RevisionAlias.BASE,
+        )) as Entity[];
       this.editorStore.changeDetectionState.workspaceBaseRevisionState.setEntities(
         workspaceBaseEntities,
       );
@@ -336,13 +344,13 @@ export class EditorSdlcState {
 
   *fetchWorkspaceBuilds(): GeneratorFn<void> {
     try {
-      this.workspaceBuilds = ((yield this.sdlcClient.getBuildsByRevision(
-        this.currentProjectId,
-        this.currentWorkspaceId,
-        RevisionAlias.CURRENT,
-      )) as PlainObject<Build>[]).map((build) =>
-        Build.serialization.fromJson(build),
-      );
+      this.workspaceBuilds = (
+        (yield this.sdlcClient.getBuildsByRevision(
+          this.currentProjectId,
+          this.currentWorkspaceId,
+          RevisionAlias.CURRENT,
+        )) as PlainObject<Build>[]
+      ).map((build) => Build.serialization.fromJson(build));
     } catch (error: unknown) {
       this.editorStore.applicationStore.logger.error(
         CORE_LOG_EVENT.SDLC_PROBLEM,

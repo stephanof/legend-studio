@@ -372,7 +372,7 @@ export const simpleProjectionWithFilter = {
   parameters: [],
 };
 
-export const testData = [
+export const ComplexRelationalModel = [
   {
     path: 'apps::pure::studio::tests::model::simple::Person',
     content: {
@@ -462,6 +462,7 @@ export const testData = [
           mainTable: {
             _type: 'Table',
             database: 'apps::pure::studio::relational::tests::dbInc',
+            mainTableDb: 'apps::pure::studio::relational::tests::dbInc',
             schema: 'default',
             table: 'personTable',
           },
@@ -472,6 +473,7 @@ export const testData = [
               table: {
                 _type: 'Table',
                 database: 'apps::pure::studio::relational::tests::dbInc',
+                mainTableDb: 'apps::pure::studio::relational::tests::dbInc',
                 schema: 'default',
                 table: 'personTable',
               },
@@ -491,12 +493,12 @@ export const testData = [
                 table: {
                   _type: 'Table',
                   database: 'apps::pure::studio::relational::tests::dbInc',
+                  mainTableDb: 'apps::pure::studio::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
                 tableAlias: 'personTable',
               },
-              source: 'apps_pure_studio_tests_model_simple_Person',
             },
             {
               _type: 'relationalPropertyMapping',
@@ -510,12 +512,12 @@ export const testData = [
                 table: {
                   _type: 'Table',
                   database: 'apps::pure::studio::relational::tests::dbInc',
+                  mainTableDb: 'apps::pure::studio::relational::tests::dbInc',
                   schema: 'default',
                   table: 'personTable',
                 },
                 tableAlias: 'personTable',
               },
-              source: 'apps_pure_studio_tests_model_simple_Person',
             },
           ],
           root: true,
@@ -698,7 +700,7 @@ export const firmPersonGraphFetch = {
   parameters: [],
 };
 
-export const m2mTestData = [
+export const M2MModel = [
   {
     path: 'demo::other::IncType',
     content: {
@@ -969,7 +971,7 @@ export const m2mTestData = [
                 class: 'demo::other::NPerson',
                 property: 'fullName',
               },
-              source: 'demo_other_NPerson',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1035,7 +1037,7 @@ export const m2mTestData = [
                 class: 'demo::other::NFirm',
                 property: 'nEmployees',
               },
-              source: 'demo_other_NFirm',
+              source: '',
               target: 'demo_other_NPerson',
               transform: {
                 _type: 'lambda',
@@ -1061,7 +1063,7 @@ export const m2mTestData = [
                 class: 'demo::other::NFirm',
                 property: 'name',
               },
-              source: 'demo_other_NFirm',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [
@@ -1087,7 +1089,7 @@ export const m2mTestData = [
                 class: 'demo::other::NFirm',
                 property: 'incType',
               },
-              source: 'demo_other_NFirm',
+              source: '',
               transform: {
                 _type: 'lambda',
                 body: [

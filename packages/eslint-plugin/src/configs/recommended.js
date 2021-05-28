@@ -29,7 +29,7 @@ const ES_RULES = {
   'arrow-parens': WARN,
   'arrow-spacing': WARN,
   'block-spacing': [WARN, 'always'],
-  'brace-style': [WARN, '1tbs', { allowSingleLine: true }],
+  'brace-style': OFF, // this will be managed by `prettier`
   'comma-dangle': [ERROR, 'only-multiline'],
   'comma-spacing': [WARN, { before: false, after: true }],
   'comma-style': [ERROR, 'last'],
@@ -210,6 +210,7 @@ const STUDIO_RULES = {
 
 const config = {
   parser: '@typescript-eslint/parser',
+  parserOptions: { extraFileExtensions: ['.mjs', '.cjs'] },
   env: {
     browser: true,
     node: true,
